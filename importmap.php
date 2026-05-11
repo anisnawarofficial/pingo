@@ -25,4 +25,7 @@ return [
     '@hotwired/turbo' => [
         'version' => '8.0.23',
     ],
+    'lucide' => [
+        'version' => '1.14.0',
+    ],
 ];

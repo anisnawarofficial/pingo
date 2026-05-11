@@ -1,0 +1,11 @@
+.logo {
+    display: block;
+    width: 180px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.login-brand .logo {
+    width: 260px;
+}

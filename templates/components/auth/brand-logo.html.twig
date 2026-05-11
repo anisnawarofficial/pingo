@@ -1,0 +1,10 @@
+{% set logo_src = src|default('images/logo-pingo.png') %}
+{% set logo_alt = alt|default('Pin’Go CRM') %}
+
+<div class="brand-logo">
+    <img
+        class="brand-logo__image logo"
+        src="{{ asset(logo_src) }}"
+        alt="{{ logo_alt }}"
+    >
+</div>

@@ -1,0 +1,50 @@
+.ui-icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.icon-wrapper--default {
+    color: var(--color-icon-default);
+}
+
+.icon-wrapper--muted {
+    color: var(--color-icon-muted);
+}
+
+.icon-wrapper--primary {
+    color: var(--color-icon-primary);
+}
+
+.icon-wrapper--xs .ui-icon {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+}
+
+.icon-wrapper--sm .ui-icon {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+}
+
+.icon-wrapper--md .ui-icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+}
+
+.icon-wrapper--lg .ui-icon {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+}
+
+.icon-wrapper--xl .ui-icon {
+    width: var(--icon-size-xl);
+    height: var(--icon-size-xl);
+}

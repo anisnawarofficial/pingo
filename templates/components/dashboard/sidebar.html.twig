@@ -1,0 +1,101 @@
+{% set active_label = active_label|default('Consultation') %}
+
+{% set navigation_items = [
+    { label: 'Accueil', icon: 'house', href: '#' },
+    { label: 'CallBack', icon: 'phone-call', href: '#', badge: '2' },
+    { label: 'Fiche clients', icon: 'contact-round', href: path('app_clients') },
+    {
+        label: 'Consultation',
+        icon: 'stethoscope',
+        href: path('app_rdv'),
+        dropdown: true,
+        open: active_label == 'Consultation',
+        submenu: [
+            'En Communication',
+            'En attente de Rdv',
+            'Avec Rdv',
+            'En attente de Paiement',
+            'Forfait en cours'
+        ]
+    },
+    { label: 'Statistiques', icon: 'chart-column', href: '#' },
+    { label: 'Configuration', icon: 'settings', href: '#', dropdown: true },
+    { label: 'Déconnexion', icon: 'log-out', href: '#' }
+] %}
+
+<aside class="rdv-sidebar" aria-label="Navigation principale">
+    <div class="rdv-sidebar__top">
+        <div class="rdv-sidebar__brand">
+            <img src="{{ asset('images/logo-pingo.png') }}" alt="Pin’Go CRM" class="rdv-sidebar__logo">
+        </div>
+
+        <button class="rdv-sidebar__toggle" type="button" data-sidebar-toggle aria-label="Réduire le menu" aria-expanded="true">
+            <span class="rdv-sidebar__toggle-icon rdv-sidebar__toggle-icon--collapse">
+                {% include 'components/ui/icon.html.twig' with { name: 'chevrons-left', size: 'lg' } only %}
+            </span>
+            <span class="rdv-sidebar__toggle-icon rdv-sidebar__toggle-icon--expand">
+                {% include 'components/ui/icon.html.twig' with { name: 'chevrons-right', size: 'lg' } only %}
+            </span>
+        </button>
+    </div>
+
+    <nav class="rdv-nav" aria-label="Menu CRM">
+        {% for item in navigation_items %}
+            {% set is_active = item.label == active_label %}
+            {% set has_submenu = item.submenu|default([])|length > 0 %}
+            {% if has_submenu %}
+                {% set submenu_id = 'rdv-submenu-' ~ loop.index %}
+                <div class="rdv-nav__group{% if item.open|default(false) %} is-open{% endif %}" data-sidebar-submenu>
+                    <button
+                        class="rdv-nav__item rdv-nav__item--button{% if is_active %} is-active{% endif %}"
+                        type="button"
+                        data-sidebar-submenu-toggle
+                        aria-expanded="{{ item.open|default(false) ? 'true' : 'false' }}"
+                        aria-controls="{{ submenu_id }}"
+                    >
+                        <span class="rdv-nav__icon">
+                            {% include 'components/ui/icon.html.twig' with { name: item.icon, size: 'lg' } only %}
+                        </span>
+                        <span class="rdv-nav__label">{{ item.label }}</span>
+                        <span class="rdv-nav__chevron">
+                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'sm' } only %}
+                        </span>
+                    </button>
+
+                    <div class="rdv-nav__submenu" id="{{ submenu_id }}">
+                        <div class="rdv-nav__submenu-inner">
+                            {% for submenu_item in item.submenu %}
+                                <a class="rdv-nav__submenu-link" href="{{ item.href }}">
+                                    <span>{{ submenu_item }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a class="rdv-nav__item{% if is_active %} is-active{% endif %}" href="{{ item.href }}">
+                    <span class="rdv-nav__icon">
+                        {% include 'components/ui/icon.html.twig' with { name: item.icon, size: 'lg' } only %}
+                    </span>
+                    <span class="rdv-nav__label">{{ item.label }}</span>
+                    {% if item.badge|default(false) %}
+                        <span class="rdv-nav__badge">{{ item.badge }}</span>
+                    {% endif %}
+                    {% if item.dropdown|default(false) %}
+                        <span class="rdv-nav__chevron">
+                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'sm' } only %}
+                        </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+        {% endfor %}
+    </nav>
+
+    <div class="rdv-profile">
+        <div class="rdv-profile__avatar" aria-hidden="true">A</div>
+        <div class="rdv-profile__meta">
+            <span>Connecté</span>
+            <strong>alfred@pingo.fr</strong>
+        </div>
+    </div>
+</aside>

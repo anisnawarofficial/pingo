@@ -1,3 +1,10 @@
-body {
-    background-color: skyblue;
-}
+@import "./settings/variables.css";
+@import "./base/reset.css";
+
+@import "./components/icon.css";
+@import "./components/logo.css";
+
+@import "./layouts/login.css";
+@import "./layouts/rdv.css";
+@import "./layouts/clients.css";
+@import "./layouts/consultation.css";

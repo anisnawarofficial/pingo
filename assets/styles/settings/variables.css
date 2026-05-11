@@ -1,0 +1,97 @@
+:root {
+    /* Colors */
+    --color-primary: #8d63ff;
+    --color-primary-dark: #241c62;
+    --color-primary-deep: #17134b;
+    --color-primary-soft: #f3efff;
+    --color-primary-glow: rgba(127, 86, 243, 0.36);
+    --color-white: #ffffff;
+    --color-text: #28234a;
+    --color-text-muted: #9a96ad;
+    --color-border: #ded8ee;
+    --color-input-bg: #ffffff;
+
+    /* Icons */
+    --color-icon-default: #8a849e;
+    --color-icon-muted: #aaa4bb;
+    --color-icon-primary: var(--color-primary);
+
+    --icon-size-xs: 14px;
+    --icon-size-sm: 16px;
+    --icon-size-md: 18px;
+    --icon-size-lg: 22px;
+    --icon-size-xl: 28px;
+
+    /* Typography */
+    --font-family-base: Inter, Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 32px;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 18px;
+    --radius-xl: 32px;
+    --radius-pill: 999px;
+
+    /* Shadows */
+    --shadow-sm: 0 4px 12px rgba(30, 25, 80, 0.08);
+    --shadow-md: 0 16px 36px rgba(30, 25, 80, 0.16);
+    --shadow-lg: 0 26px 60px rgba(30, 25, 80, 0.24);
+
+    /* Login layout */
+    --login-card-width: 90vw;
+    --login-card-height: 78vh;
+    --login-card-max-width: 1240px;
+    --login-card-min-height: 630px;
+    --login-card-radius: 42px;
+    --login-form-width: 430px;
+    --login-control-height: 58px;
+    --login-brand-panel-width: clamp(500px, 44vw, 860px);
+    --login-brand-panel-edge-offset: 24px;
+
+    /* Dashboard layout */
+    --dashboard-bg: #f6f2ff;
+    --dashboard-surface: #ffffff;
+    --dashboard-surface-soft: #fbf9ff;
+    --dashboard-sidebar-bg: #171344;
+    --dashboard-sidebar-bg-soft: #231b63;
+    --dashboard-sidebar-width: 282px;
+    --dashboard-sidebar-collapsed-width: 96px;
+    --dashboard-shell-padding: 22px;
+    --dashboard-sidebar-radius: 30px;
+    --dashboard-card-radius: 24px;
+    --dashboard-panel-radius: 30px;
+    --dashboard-shadow: 0 18px 44px rgba(39, 30, 90, 0.12);
+    --dashboard-shadow-soft: 0 10px 28px rgba(39, 30, 90, 0.08);
+    --dashboard-gradient: linear-gradient(135deg, #9b6dff 0%, #7b50f0 48%, #4d37b3 100%);
+
+    /* Status colors */
+    --color-success: #26a866;
+    --color-success-soft: #eaf8f0;
+    --color-warning: #f28a24;
+    --color-warning-soft: #fff3e5;
+    --color-info: #3185e8;
+    --color-info-soft: #eaf3ff;
+}

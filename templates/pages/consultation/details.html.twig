@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de consultation | Pin’Go CRM{% endblock %}
+
+{% set history_cards = [
+    { label: 'Rendez-vous', icon: 'calendar-days' },
+    { label: 'Consultation', icon: 'stethoscope' },
+    { label: 'Forfait', icon: 'package' },
+    { label: 'Paiement', icon: 'credit-card' }
+] %}
+
+{% set info_rows = [
+    [
+        { label: 'Client:', value: 'Lorem Opsum Dolor' },
+        { label: 'Date de naissance:', value: '01/01/2000' },
+        { label: 'Tél:', value: '00 00 00 00 00' }
+    ],
+    [
+        { label: 'E-mail:', value: 'Lorem@email.com', link: true },
+        { label: 'Voyant | consultant:', value: 'Lorem Opsum' },
+        { label: 'Source:', value: 'lorem' }
+    ],
+    [
+        { label: 'Tarif:', value: '000.00€' },
+        { label: 'Carte Principale:', value: 'xx xx xx xx xx xx xx', wide: true }
+    ]
+] %}
+
+{% block body %}
+<div class="rdv-page consultation-page" data-rdv-page>
+    {% include 'components/dashboard/sidebar.html.twig' with { active_label: 'Consultation' } only %}
+
+    <main class="consultation-main">
+        <header class="consultation-titlebar">
+            <div class="consultation-titlebar__block">
+                <span class="consultation-titlebar__icon">
+                    {% include 'components/ui/icon.html.twig' with { name: 'file-text', size: 'lg' } only %}
+                </span>
+                <h1>Détails de consultation</h1>
+            </div>
+
+            <button class="consultation-info-button" type="button" aria-label="Informations">
+                {% include 'components/ui/icon.html.twig' with { name: 'info', size: 'md' } only %}
+            </button>
+        </header>
+
+        <section class="consultation-history" aria-label="Historique et mode de paiement">
+            <div class="consultation-history__group">
+                <span class="consultation-history__label">Historique des:</span>
+
+                <div class="consultation-history__cards">
+                    {% for card in history_cards %}
+                        <button class="consultation-history-card" type="button">
+                            {% include 'components/ui/icon.html.twig' with { name: card.icon, size: 'md' } only %}
+                            <span>{{ card.label }}</span>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="consultation-payment-mode">
+                <span>Mode de paiement:</span>
+                <button class="consultation-eye-button" type="button" aria-label="Voir le mode de paiement">
+                    {% include 'components/ui/icon.html.twig' with { name: 'eye', size: 'md' } only %}
+                </button>
+            </div>
+        </section>
+
+        <section class="consultation-panel consultation-info-card" aria-labelledby="consultation-card-title">
+            <header class="consultation-card-header">
+                <div class="consultation-card-header__title">
+                    <span class="consultation-card-header__icon">
+                        {% include 'components/ui/icon.html.twig' with { name: 'user', size: 'lg', variant: 'primary' } only %}
+                    </span>
+                    <h2 id="consultation-card-title">CONS ID: 9</h2>
+                </div>
+
+                <div class="consultation-card-actions">
+                    <button class="consultation-edit-button" type="button">
+                        {% include 'components/ui/icon.html.twig' with { name: 'pencil', size: 'sm' } only %}
+                        <span>Editer</span>
+                    </button>
+                    <button class="consultation-delete-button" type="button" aria-label="Supprimer la consultation">
+                        {% include 'components/ui/icon.html.twig' with { name: 'trash-2', size: 'sm' } only %}
+                    </button>
+                </div>
+            </header>
+
+            <div class="consultation-info-grid">
+                {% for row in info_rows %}
+                    <div class="consultation-info-grid__row">
+                        {% for item in row %}
+                            <div class="consultation-info-item{% if item.wide|default(false) %} consultation-info-item--wide{% endif %}">
+                                <span class="consultation-info-item__label">{{ item.label }}</span>
+                                {% if item.link|default(false) %}
+                                    <a class="consultation-info-item__value consultation-info-item__value--link" href="mailto:{{ item.value }}">{{ item.value }}</a>
+                                {% else %}
+                                    <span class="consultation-info-item__value">{{ item.value }}</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="consultation-lower-grid">
+            <section class="consultation-panel consultation-rdv-panel" aria-labelledby="rdv-management-title">
+                <header class="consultation-section-header">
+                    <div class="consultation-section-header__title">
+                        <span class="consultation-section-header__icon">
+                            {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'md', variant: 'primary' } only %}
+                        </span>
+                        <h2 id="rdv-management-title">GESTION DES RDV</h2>
+                    </div>
+
+                    <button class="consultation-pill-button" type="button">
+                        {% include 'components/ui/icon.html.twig' with { name: 'history', size: 'sm' } only %}
+                        <span>Pré-auto</span>
+                    </button>
+                </header>
+
+                <div class="consultation-rdv-table" role="table" aria-label="Gestion des rendez-vous">
+                    <div class="consultation-rdv-table__head" role="row">
+                        <span role="columnheader">Date</span>
+                        <span role="columnheader">Historique</span>
+                        <span role="columnheader">Status</span>
+                        <span role="columnheader">Actions</span>
+                    </div>
+
+                    <article class="consultation-rdv-table__row" role="row">
+                        <span role="cell" data-label="Date">
+                            <span class="consultation-date-stack">
+                                <span>2025-12-11</span>
+                                <span>08:46:00</span>
+                            </span>
+                        </span>
+                        <span role="cell" data-label="Historique">
+                            <button class="consultation-history-icon-button" type="button" aria-label="Voir l’historique">
+                                {% include 'components/ui/icon.html.twig' with { name: 'book-open', size: 'md' } only %}
+                            </button>
+                        </span>
+                        <span role="cell" data-label="Status">
+                            <span class="consultation-status">En cours</span>
+                        </span>
+                        <span role="cell" data-label="Actions">
+                            <span class="consultation-rdv-actions">
+                                <button type="button">Reporter</button>
+                                <button type="button">En communication</button>
+                                <button type="button">Annuler</button>
+                            </span>
+                        </span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="consultation-panel consultation-comments-panel" aria-labelledby="comments-title">
+                <header class="consultation-section-header">
+                    <div class="consultation-section-header__title">
+                        <span class="consultation-section-header__icon">
+                            {% include 'components/ui/icon.html.twig' with { name: 'file-text', size: 'md', variant: 'primary' } only %}
+                        </span>
+                        <h2 id="comments-title">COMMENTAIRES:</h2>
+                    </div>
+
+                    <button class="consultation-add-comment-button" type="button">
+                        {% include 'components/ui/icon.html.twig' with { name: 'plus', size: 'sm' } only %}
+                        <span>Ajouter</span>
+                    </button>
+                </header>
+
+                <div class="consultation-comment-section">
+                    <h3>Consultation</h3>
+                    <div class="consultation-comment-table" role="table" aria-label="Commentaires consultation">
+                        <div class="consultation-comment-table__head" role="row">
+                            <span role="columnheader">Date:</span>
+                            <span role="columnheader">Description:</span>
+                            <span role="columnheader">Action:</span>
+                        </div>
+                        <div class="consultation-comment-table__row" role="row">
+                            <span role="cell" data-label="Date:">
+                                <span class="consultation-date-stack">
+                                    <span>2025-12-11</span>
+                                    <span>08:46:00</span>
+                                </span>
+                            </span>
+                            <span role="cell" data-label="Description:">Lorem Opsum dolor oreum</span>
+                            <span role="cell" data-label="Action:">Lorem Opsum</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="consultation-comment-section">
+                    <h3>Client</h3>
+                    <div class="consultation-comment-empty" aria-label="Commentaires client"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}

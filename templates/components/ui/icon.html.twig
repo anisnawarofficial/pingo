@@ -1,0 +1,6 @@
+{% set icon_size = size|default('md') %}
+{% set icon_variant = variant|default('default') %}
+
+<span class="icon-wrapper icon-wrapper--{{ icon_size }} icon-wrapper--{{ icon_variant }}" aria-hidden="true">
+    <i data-lucide="{{ name }}"></i>
+</span>

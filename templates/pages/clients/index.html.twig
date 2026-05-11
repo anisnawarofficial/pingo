@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Clients | Pin’Go CRM{% endblock %}
+
+{% set clients = [
+    { id: '#0001', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
+    { id: '#0002', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
+    { id: '#0003', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
+    { id: '#0003', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' }
+] %}
+
+{% block body %}
+<div class="rdv-page clients-page" data-rdv-page>
+    {% include 'components/dashboard/sidebar.html.twig' with { active_label: 'Fiche clients' } only %}
+
+    <main class="clients-main">
+        <header class="clients-header">
+            <div class="clients-header__title-group">
+                <span class="clients-header__icon">
+                    {% include 'components/ui/icon.html.twig' with { name: 'contact-round', size: 'lg', variant: 'primary' } only %}
+                </span>
+                <div>
+                    <h1>Gestion des Clients</h1>
+                    <p>Ajouter/Modifier/Chercher des Clients</p>
+                </div>
+            </div>
+
+            <button class="clients-add-button" type="button">
+                {% include 'components/ui/icon.html.twig' with { name: 'plus', size: 'sm' } only %}
+                <span>Ajouter un Client</span>
+            </button>
+        </header>
+
+        <section class="clients-panel clients-search-panel" aria-labelledby="client-search-title">
+            <h2 id="client-search-title">Formulaire de recherche client</h2>
+
+            <form class="clients-search-form" action="#" method="get">
+                <label class="clients-field clients-field--active">
+                    <span class="clients-field__label">Prénom du client</span>
+                    <input type="text" name="prenom" value="Eddy" aria-label="Prénom du client">
+                </label>
+
+                <label class="clients-field">
+                    <span class="clients-field__label">Nom du client</span>
+                    <input type="text" name="nom" placeholder="Nom du client" aria-label="Nom du client">
+                </label>
+
+                <label class="clients-field">
+                    <span class="clients-field__label">Téléphone du client</span>
+                    <input type="tel" name="telephone" placeholder="Téléphone du client" aria-label="Téléphone du client">
+                </label>
+
+                <label class="clients-field clients-field--with-icon">
+                    <span class="clients-field__label">Date de naissance</span>
+                    <input type="text" name="date" placeholder="jj/mm/aaaa" aria-label="Date de naissance">
+                    <span class="clients-field__icon">
+                        {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
+                    </span>
+                </label>
+
+                <button class="clients-search-button" type="submit">
+                    {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'sm' } only %}
+                    <span>Recherche</span>
+                </button>
+            </form>
+        </section>
+
+        <section class="clients-panel clients-list-panel" aria-labelledby="client-list-title">
+            <div class="clients-list-panel__header">
+                <h2 id="client-list-title">Rendez-vous du jour</h2>
+
+                <div class="clients-filter-row">
+                    <div class="clients-tabs" role="tablist" aria-label="Filtres clients">
+                        <button class="clients-tab is-active" type="button" role="tab" aria-selected="true">Titre</button>
+                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
+                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
+                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
+                    </div>
+
+                    <div class="clients-date-range" aria-label="Filtre par date">
+                        <label class="clients-date-field">
+                            <input type="text" value="10-01-2026" aria-label="Date de début">
+                            {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
+                        </label>
+                        <span>jusqu’à</span>
+                        <label class="clients-date-field">
+                            <input type="text" value="10-01-2026" aria-label="Date de fin">
+                            {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clients-table" role="table" aria-label="Liste des clients">
+                <div class="clients-table__head" role="row">
+                    <span role="columnheader">
+                        ID
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'xs' } only %}
+                    </span>
+                    <span role="columnheader">Prénom</span>
+                    <span role="columnheader">Nom</span>
+                    <span role="columnheader">Date de naissance</span>
+                    <span role="columnheader">Tel1</span>
+                    <span role="columnheader">Info</span>
+                    <span role="columnheader">Consult</span>
+                    <span role="columnheader" aria-label="Actions"></span>
+                </div>
+
+                <div class="clients-table__body">
+                    {% for client in clients %}
+                        <article class="clients-table__row" role="row">
+                            <span role="cell" data-label="ID">{{ client.id }}</span>
+                            <span role="cell" data-label="Prénom">{{ client.firstName }}</span>
+                            <span role="cell" data-label="Nom">{{ client.lastName }}</span>
+                            <span role="cell" data-label="Date de naissance">{{ client.birthDate }}</span>
+                            <span role="cell" data-label="Tel1">{{ client.tel }}</span>
+                            <span role="cell" data-label="Info">
+                                <button class="clients-info-button" type="button">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'eye', size: 'sm' } only %}
+                                    <span>Visualiser</span>
+                                </button>
+                            </span>
+                            <span role="cell" data-label="Consult">
+                                <button class="clients-consult-button" type="button" aria-label="Démarrer une consultation">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'headset', size: 'sm' } only %}
+                                </button>
+                            </span>
+                            <span role="cell" data-label="Actions">
+                                <button class="clients-row-menu" type="button" aria-label="Actions du client">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'more-vertical', size: 'sm' } only %}
+                                </button>
+                            </span>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <footer class="rdv-panel__footer clients-panel__footer">
+                <p>Affichage de l’élément # à # sur 12 éléments</p>
+
+                <nav class="rdv-pagination" aria-label="Pagination">
+                    <a href="#" aria-label="Page précédente">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
+                    </a>
+                    <a class="is-active" href="#">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <span>...</span>
+                    <a href="#">12</a>
+                    <a href="#" aria-label="Page suivante">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
+                    </a>
+                </nav>
+
+                <a class="rdv-panel__show-all" href="#">Afficher tout</a>
+            </footer>
+        </section>
+    </main>
+</div>
+{% endblock %}
