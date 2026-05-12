@@ -1,0 +1,188 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Consultation En communication | Pin’Go CRM{% endblock %}
+
+{% set consultation_rows = [
+    {
+        id: '525',
+        startedAt: '11/12 11:39:35',
+        since: '02h54m',
+        client: 'Lore Opsum',
+        birthDate: '08/10/1993',
+        tel: '00 00 00 00 00',
+        voyant: 'Lorem',
+        consultant: 'Lorem',
+        filled: false
+    },
+    {
+        id: '9',
+        startedAt: '11/12 11:39:35',
+        since: '02h54m',
+        client: 'Lore Opsum',
+        birthDate: '08/10/1993',
+        tel: '00 00 00 00 00',
+        voyant: 'Lorem',
+        consultant: 'Lorem',
+        filled: true,
+        featured: true
+    },
+    {
+        id: '32',
+        startedAt: '11/12 11:39:35',
+        since: '02h54m',
+        client: 'Lore Opsum',
+        birthDate: '08/10/1993',
+        tel: '00 00 00 00 00',
+        voyant: 'Lorem',
+        consultant: 'Lorem',
+        filled: false
+    },
+    {
+        id: '25',
+        startedAt: '11/12 11:39:35',
+        since: '02h54m',
+        client: 'Lore Opsum',
+        birthDate: '08/10/1993',
+        tel: '00 00 00 00 00',
+        voyant: 'Lorem',
+        consultant: 'Lorem',
+        filled: false
+    },
+    {
+        id: '423',
+        startedAt: '11/12 11:39:35',
+        since: '02h54m',
+        client: 'Lore Opsum',
+        birthDate: '08/10/1993',
+        tel: '00 00 00 00 00',
+        voyant: 'Lorem',
+        consultant: 'Lorem',
+        filled: false
+    }
+] %}
+
+{% block body %}
+<div class="rdv-page consultation-list-page" data-rdv-page>
+    {% include 'components/dashboard/sidebar.html.twig' with { active_label: 'Consultation', active_submenu: 'En Communication' } only %}
+
+    <main class="consultation-list-main">
+        <header class="consultation-list-header">
+            <div class="consultation-list-header__title-group">
+                <span class="consultation-list-header__icon">
+                    {% include 'components/ui/icon.html.twig' with { name: 'headphones', size: 'lg', variant: 'primary' } only %}
+                </span>
+                <div>
+                    <h1>Gestion des Consultations</h1>
+                    <p>Ajouter une consultation - Gérer un forfait</p>
+                </div>
+            </div>
+
+            <button class="consultation-list-add-button" type="button">
+                {% include 'components/ui/icon.html.twig' with { name: 'plus', size: 'sm' } only %}
+                <span>Ajouter une Consultation</span>
+            </button>
+        </header>
+
+        <section class="consultation-list-panel" aria-labelledby="consultation-list-title">
+            <div class="consultation-list-panel__top">
+                <h2 id="consultation-list-title">Consultation En communication</h2>
+
+                <div class="consultation-list-controls">
+                    <label class="rdv-show-count consultation-list-count">
+                        <span>Afficher</span>
+                        <span class="consultation-list-select">
+                            <select aria-label="Nombre d’éléments affichés">
+                                <option selected>6</option>
+                                <option>10</option>
+                                <option>25</option>
+                            </select>
+                            <span class="consultation-list-select__icon">
+                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-up', size: 'xs' } only %}
+                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'xs' } only %}
+                            </span>
+                        </span>
+                        <span>éléments</span>
+                    </label>
+
+                    <label class="rdv-search consultation-list-search">
+                        <span class="rdv-search__icon">
+                            {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'md' } only %}
+                        </span>
+                        <input type="search" placeholder="Rechercher..." aria-label="Rechercher une consultation">
+                    </label>
+                </div>
+
+                <div class="consultation-export-actions" aria-label="Actions d’export">
+                    <button class="consultation-export-button consultation-export-button--csv" type="button" aria-label="Exporter en CSV">
+                        {% include 'components/ui/icon.html.twig' with { name: 'file-text', size: 'sm' } only %}
+                        <span>CSV</span>
+                    </button>
+                    <button class="consultation-export-button consultation-export-button--pdf" type="button" aria-label="Exporter en PDF">
+                        {% include 'components/ui/icon.html.twig' with { name: 'file-text', size: 'sm' } only %}
+                        <span>PDF</span>
+                    </button>
+                    <button class="consultation-copy-button" type="button">
+                        {% include 'components/ui/icon.html.twig' with { name: 'copy', size: 'sm' } only %}
+                        <span>Copier</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="consultation-communication-table" role="table" aria-label="Consultations en communication">
+                <div class="consultation-communication-table__head" role="row">
+                    <span role="columnheader">#</span>
+                    <span role="columnheader">Commencer</span>
+                    <span role="columnheader">Depuis</span>
+                    <span role="columnheader">Client</span>
+                    <span role="columnheader">Date de naissance</span>
+                    <span role="columnheader">Tél</span>
+                    <span role="columnheader">Voyant</span>
+                    <span role="columnheader">Consultant</span>
+                    <span role="columnheader">Info</span>
+                </div>
+
+                <div class="consultation-communication-table__body">
+                    {% for row in consultation_rows %}
+                        <article class="consultation-communication-table__row{% if row.featured|default(false) %} is-featured{% endif %}" role="row">
+                            <span role="cell" data-label="#">{{ row.id }}</span>
+                            <span role="cell" data-label="Commencer">{{ row.startedAt }}</span>
+                            <span role="cell" data-label="Depuis">{{ row.since }}</span>
+                            <span role="cell" data-label="Client">{{ row.client }}</span>
+                            <span role="cell" data-label="Date de naissance">{{ row.birthDate }}</span>
+                            <span role="cell" data-label="Tél">{{ row.tel }}</span>
+                            <span role="cell" data-label="Voyant">{{ row.voyant }}</span>
+                            <span role="cell" data-label="Consultant">{{ row.consultant }}</span>
+                            <span role="cell" data-label="Info">
+                                <button class="consultation-info-pill{% if row.filled %} is-filled{% endif %}" type="button">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'user', size: 'sm' } only %}
+                                    <span>{{ row.id }}</span>
+                                </button>
+                            </span>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <footer class="rdv-panel__footer consultation-list-footer">
+                <p>Affichage de l’élément # à # sur 12 éléments</p>
+
+                <nav class="rdv-pagination" aria-label="Pagination">
+                    <a href="#" aria-label="Page précédente">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
+                    </a>
+                    <a class="is-active" href="#">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <span>...</span>
+                    <a href="#">12</a>
+                    <a href="#" aria-label="Page suivante">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
+                    </a>
+                </nav>
+
+                <a class="rdv-panel__show-all" href="#">Afficher tout</a>
+            </footer>
+        </section>
+    </main>
+</div>
+{% endblock %}

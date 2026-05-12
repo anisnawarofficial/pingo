@@ -1,4 +1,5 @@
 {% set active_label = active_label|default('Consultation') %}
+{% set active_submenu = active_submenu|default(null) %}
 
 {% set navigation_items = [
     { label: 'Accueil', icon: 'house', href: '#' },
@@ -11,11 +12,11 @@
         dropdown: true,
         open: active_label == 'Consultation',
         submenu: [
-            'En Communication',
-            'En attente de Rdv',
-            'Avec Rdv',
-            'En attente de Paiement',
-            'Forfait en cours'
+            { label: 'En Communication', href: path('app_consultation_en_communication') },
+            { label: 'En attente de Rdv', href: path('app_rdv') },
+            { label: 'Avec Rdv', href: path('app_rdv') },
+            { label: 'En attente de Paiement', href: '#' },
+            { label: 'Forfait en cours', href: '#' }
         ]
     },
     { label: 'Statistiques', icon: 'chart-column', href: '#' },
@@ -65,8 +66,9 @@
                     <div class="rdv-nav__submenu" id="{{ submenu_id }}">
                         <div class="rdv-nav__submenu-inner">
                             {% for submenu_item in item.submenu %}
-                                <a class="rdv-nav__submenu-link" href="{{ item.href }}">
-                                    <span>{{ submenu_item }}</span>
+                                {% set is_submenu_active = submenu_item.label == active_submenu %}
+                                <a class="rdv-nav__submenu-link{% if is_submenu_active %} is-active{% endif %}" href="{{ submenu_item.href }}" {% if is_submenu_active %}aria-current="page"{% endif %}>
+                                    <span>{{ submenu_item.label }}</span>
                                 </a>
                             {% endfor %}
                         </div>

@@ -18,7 +18,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-gutter: stable;
-    padding: var(--space-6) var(--space-4);
+    padding: 28px 18px var(--space-6) 28px;
     border-radius: var(--dashboard-sidebar-radius);
     background:
         radial-gradient(circle at 78% 12%, rgba(151, 110, 255, 0.22), transparent 32%),
@@ -37,8 +37,16 @@
     padding-left: var(--space-3);
 }
 
+.rdv-page--sidebar-collapsed .rdv-sidebar__top {
+    min-height: 118px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-4);
+}
+
 .rdv-sidebar__top {
-    min-height: 76px;
+    min-height: 134px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -46,10 +54,11 @@
 }
 
 .rdv-sidebar__brand {
-    display: grid;
-    gap: var(--space-1);
+    width: min(150px, calc(100% - 58px));
+    flex: 0 1 150px;
+    display: flex;
+    align-items: flex-start;
     color: var(--color-white);
-    white-space: nowrap;
     transition:
         opacity 180ms ease,
         transform 260ms ease,
@@ -57,7 +66,8 @@
 }
 
 .rdv-sidebar__logo {
-    width: 150px;
+    width: 142px;
+    max-width: 100%;
     height: auto;
     object-fit: contain;
 }
@@ -74,10 +84,15 @@
 }
 
 .rdv-page--sidebar-collapsed .rdv-sidebar__brand {
-    width: 0;
-    opacity: 0;
-    transform: translateX(-10px);
-    pointer-events: none;
+    width: 56px;
+    flex-basis: 56px;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+.rdv-page--sidebar-collapsed .rdv-sidebar__logo {
+    width: 56px;
 }
 
 .rdv-sidebar__toggle {
@@ -123,7 +138,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
 }
 
 .rdv-nav__group {
@@ -285,6 +300,17 @@
 .rdv-nav__submenu-link:focus-visible {
     background: rgba(255, 255, 255, 0.1);
     color: var(--color-white);
+}
+
+.rdv-nav__submenu-link.is-active {
+    border-top-color: transparent;
+    background: var(--dashboard-gradient);
+    color: var(--color-white);
+    box-shadow: 0 10px 24px rgba(110, 75, 231, 0.3);
+}
+
+.rdv-nav__submenu-link.is-active + .rdv-nav__submenu-link {
+    border-top-color: transparent;
 }
 
 .rdv-page--sidebar-collapsed .rdv-nav__item {
