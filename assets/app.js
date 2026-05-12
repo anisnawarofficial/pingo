@@ -36,7 +36,8 @@ import {
     Trash2,
     User,
     UsersRound,
-    WalletCards
+    WalletCards,
+    X
 } from 'lucide';
 
 const icons = {
@@ -74,7 +75,8 @@ const icons = {
     Trash2,
     User,
     UsersRound,
-    WalletCards
+    WalletCards,
+    X
 };
 
 const renderIcons = () => {
@@ -195,10 +197,116 @@ const initRdvPanelToggle = () => {
     setView(activeToggle ? activeToggle.dataset.rdvViewToggle : 'rdv');
 };
 
+const initHistoriqueModal = () => {
+    const modalOverlay = document.querySelector('[data-historique-modal]');
+    const openButtons = Array.from(document.querySelectorAll('[data-open-historique-modal]'));
+
+    if (!modalOverlay || !openButtons.length) {
+        return;
+    }
+
+    const closeButtons = Array.from(modalOverlay.querySelectorAll('[data-close-historique-modal]'));
+    const closeButton = closeButtons[0] || null;
+    let closeTimer;
+
+    const openModal = () => {
+        window.clearTimeout(closeTimer);
+        modalOverlay.hidden = false;
+        document.body.classList.add('has-historique-modal');
+
+        window.requestAnimationFrame(() => {
+            modalOverlay.classList.add('is-open');
+            closeButton?.focus();
+        });
+    };
+
+    const closeModal = () => {
+        modalOverlay.classList.remove('is-open');
+        document.body.classList.remove('has-historique-modal');
+
+        closeTimer = window.setTimeout(() => {
+            modalOverlay.hidden = true;
+        }, 220);
+    };
+
+    openButtons.forEach((button) => {
+        button.addEventListener('click', openModal);
+    });
+
+    closeButtons.forEach((button) => {
+        button.addEventListener('click', closeModal);
+    });
+
+    modalOverlay.addEventListener('click', (event) => {
+        if (event.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modalOverlay.hidden) {
+            closeModal();
+        }
+    });
+};
+
+const initPaymentModal = () => {
+    const modalOverlay = document.querySelector('[data-payment-modal]');
+    const openButton = document.querySelector('[data-open-payment-modal]');
+
+    if (!modalOverlay || !openButton) {
+        return;
+    }
+
+    const closeButtons = Array.from(modalOverlay.querySelectorAll('[data-close-payment-modal]'));
+    const closeButton = closeButtons[0] || null;
+    let closeTimer;
+
+    const openModal = () => {
+        window.clearTimeout(closeTimer);
+        modalOverlay.hidden = false;
+        document.body.classList.add('has-payment-modal');
+
+        window.requestAnimationFrame(() => {
+            modalOverlay.classList.add('is-open');
+            closeButton?.focus();
+        });
+    };
+
+    const closeModal = () => {
+        modalOverlay.classList.remove('is-open');
+        document.body.classList.remove('has-payment-modal');
+
+        closeTimer = window.setTimeout(() => {
+            modalOverlay.hidden = true;
+        }, 220);
+    };
+
+    openButton.addEventListener('click', openModal);
+
+    closeButtons.forEach((button) => {
+        button.addEventListener('click', closeModal);
+    });
+
+    modalOverlay.addEventListener('click', (event) => {
+        if (event.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modalOverlay.hidden) {
+            closeModal();
+        }
+    });
+};
+
 const boot = () => {
     renderIcons();
     initRdvSidebar();
     initRdvPanelToggle();
+    initHistoriqueModal();
+    initPaymentModal();
 };
 
 if (document.readyState === 'loading') {

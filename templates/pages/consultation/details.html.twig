@@ -26,6 +26,13 @@
     ]
 ] %}
 
+{% set payment_rows = [
+    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false },
+    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: true },
+    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false },
+    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false }
+] %}
+
 {% block body %}
 <div class="rdv-page consultation-page" data-rdv-page>
     {% include 'components/dashboard/sidebar.html.twig' with { active_label: 'Consultation' } only %}
@@ -50,7 +57,7 @@
 
                 <div class="consultation-history__cards">
                     {% for card in history_cards %}
-                        <button class="consultation-history-card" type="button">
+                        <button class="consultation-history-card" type="button" data-open-historique-modal aria-haspopup="dialog" aria-controls="historique-modal">
                             {% include 'components/ui/icon.html.twig' with { name: card.icon, size: 'md' } only %}
                             <span>{{ card.label }}</span>
                         </button>
@@ -60,7 +67,7 @@
 
             <div class="consultation-payment-mode">
                 <span>Mode de paiement:</span>
-                <button class="consultation-eye-button" type="button" aria-label="Voir le mode de paiement">
+                <button class="consultation-eye-button" type="button" aria-label="Voir le mode de paiement" data-open-payment-modal aria-haspopup="dialog" aria-controls="payment-modal">
                     {% include 'components/ui/icon.html.twig' with { name: 'eye', size: 'md' } only %}
                 </button>
             </div>
@@ -136,7 +143,7 @@
                             </span>
                         </span>
                         <span role="cell" data-label="Historique">
-                            <button class="consultation-history-icon-button" type="button" aria-label="Voir l’historique">
+                            <button class="consultation-history-icon-button" type="button" aria-label="Voir l’historique" data-open-historique-modal aria-haspopup="dialog" aria-controls="historique-modal">
                                 {% include 'components/ui/icon.html.twig' with { name: 'book-open', size: 'md' } only %}
                             </button>
                         </span>
@@ -197,5 +204,140 @@
             </section>
         </div>
     </main>
+
+    <div class="historique-modal-overlay" data-historique-modal hidden>
+        <section class="historique-modal" id="historique-modal" role="dialog" aria-modal="true" aria-labelledby="historique-modal-title">
+            <button class="historique-modal__close" type="button" data-close-historique-modal aria-label="Fermer l’historique">
+                {% include 'components/ui/icon.html.twig' with { name: 'x', size: 'lg' } only %}
+            </button>
+
+            <div class="historique-modal__header">
+                {% include 'components/ui/icon.html.twig' with { name: 'file-text', size: 'lg' } only %}
+                <h2 id="historique-modal-title">Lorem Opsum Dolor</h2>
+            </div>
+
+            <div class="historique-modal__table" role="table" aria-label="Détails de l’historique">
+                <div class="historique-modal__table-head" role="row">
+                    <span role="columnheader">Date:</span>
+                    <span role="columnheader">Description:</span>
+                    <span role="columnheader">Action:</span>
+                </div>
+
+                <div class="historique-modal__table-row" role="row">
+                    <span role="cell" data-label="Date:">2025-12-11 08:46:00</span>
+                    <span role="cell" data-label="Description:">
+                        <span>Lorem Opsum dolor</span>
+                        <span>oreum</span>
+                    </span>
+                    <span role="cell" data-label="Action:">Lorem Opsum</span>
+                </div>
+            </div>
+
+            <footer class="historique-modal__footer">
+                <button class="historique-modal__button" type="button" data-close-historique-modal>Fermer</button>
+            </footer>
+        </section>
+    </div>
+
+    <div class="payment-modal-overlay" data-payment-modal hidden>
+        <section class="payment-modal" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+            <button class="payment-modal__close" type="button" data-close-payment-modal aria-label="Fermer le mode de paiement">
+                {% include 'components/ui/icon.html.twig' with { name: 'x', size: 'xl' } only %}
+            </button>
+
+            <div class="payment-modal__header">
+                {% include 'components/ui/icon.html.twig' with { name: 'wallet-cards', size: 'xl' } only %}
+                <h2 id="payment-modal-title">Lorem Opsum Dolor</h2>
+            </div>
+
+            <div class="payment-modal__controls">
+                <label class="payment-modal__count">
+                    <span>Afficher</span>
+                    <span class="payment-modal__select">
+                        <select aria-label="Nombre d’éléments de paiement affichés">
+                            <option selected>3</option>
+                            <option>6</option>
+                            <option>12</option>
+                        </select>
+                        <span class="payment-modal__select-icon">
+                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-up', size: 'xs' } only %}
+                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'xs' } only %}
+                        </span>
+                    </span>
+                    <span>éléments</span>
+                </label>
+
+                <label class="payment-modal__search">
+                    {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'md' } only %}
+                    <input type="search" placeholder="Rechercher..." aria-label="Rechercher un mode de paiement">
+                </label>
+            </div>
+
+            <div class="payment-modal__table" role="table" aria-label="Modes de paiement">
+                <div class="payment-modal__table-head" role="row">
+                    {% for header in ['ID', 'Numéro', 'Crypto', 'Month', 'Year', 'Status', 'Maj'] %}
+                        <span role="columnheader" class="payment-modal__column-label">
+                            <span>{{ header }}</span>
+                            <span class="payment-modal__sort" aria-hidden="true">
+                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-up', size: 'xs' } only %}
+                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'xs' } only %}
+                            </span>
+                        </span>
+                    {% endfor %}
+                </div>
+
+                <div class="payment-modal__table-body">
+                    {% for row in payment_rows %}
+                        <article class="payment-modal__table-row{% if row.active %} is-featured{% endif %}" role="row">
+                            <span role="cell" data-label="ID">{{ row.id }}</span>
+                            <span role="cell" data-label="Numéro">
+                                <span class="payment-modal__card-number">
+                                    <span>{{ row.numberLine1 }}</span>
+                                    <span>{{ row.numberLine2 }}</span>
+                                </span>
+                            </span>
+                            <span role="cell" data-label="Crypto">{{ row.crypto }}</span>
+                            <span role="cell" data-label="Month">{{ row.month }}</span>
+                            <span role="cell" data-label="Year">{{ row.year }}</span>
+                            <span role="cell" data-label="Status">{{ row.status }}</span>
+                            <span role="cell" data-label="Maj">
+                                <button class="payment-modal__edit{% if row.active %} is-active{% endif %}" type="button" aria-label="Modifier la carte {{ row.id }}">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'pencil', size: 'md' } only %}
+                                </button>
+                            </span>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <footer class="payment-modal__pagination">
+                <p>Affichage de l’élément # à # sur 12 éléments</p>
+
+                <nav class="payment-modal__pages" aria-label="Pagination des modes de paiement">
+                    <a href="#" aria-label="Page précédente">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
+                    </a>
+                    <a class="is-active" href="#">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <span>...</span>
+                    <a href="#">12</a>
+                    <a href="#" aria-label="Page suivante">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
+                    </a>
+                </nav>
+
+                <a class="payment-modal__show-all" href="#">Afficher tout</a>
+            </footer>
+
+            <div class="payment-modal__actions">
+                <button class="payment-modal__add" type="button">
+                    {% include 'components/ui/icon.html.twig' with { name: 'plus', size: 'md' } only %}
+                    <span>Ajouter une autre carte</span>
+                </button>
+                <button class="payment-modal__dismiss" type="button" data-close-payment-modal>Fermer</button>
+            </div>
+        </section>
+    </div>
 </div>
 {% endblock %}
