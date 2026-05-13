@@ -1,0 +1,39 @@
+{% set overlay_attrs = overlay_attrs|default({}) %}
+{% set modal_label_id = label_id|default(id ~ '-title') %}
+
+<div
+    class="crm-modal-overlay {{ overlay_classes|default('') }}"
+    data-modal-overlay
+    data-modal-id="{{ id }}"
+    hidden
+    {% for attr, value in overlay_attrs %}
+        {{ attr }}{% if value is not same as(false) and value is not same as(null) and value is not same as(true) %}="{{ value }}"{% endif %}
+    {% endfor %}
+>
+    <section class="crm-modal crm-modal--{{ size|default('medium') }} {{ modal_classes|default('') }}" id="{{ id }}" role="dialog" aria-modal="true" aria-labelledby="{{ modal_label_id }}">
+        {% if close_button|default(true) %}
+            <button class="crm-modal__close {{ close_classes|default('') }}" type="button" data-modal-close aria-label="{{ close_label|default('Fermer') }}">
+                {% include 'components/ui/icon.html.twig' with { name: 'x', size: close_icon_size|default('lg') } only %}
+            </button>
+        {% endif %}
+
+        {% if badge_title|default(false) %}
+            <div class="crm-modal__badge {{ badge_classes|default('') }}">
+                {% if badge_icon|default(false) %}
+                    {% include 'components/ui/icon.html.twig' with { name: badge_icon, size: badge_icon_size|default('lg') } only %}
+                {% endif %}
+                <h2 id="{{ modal_label_id }}">{{ badge_title }}</h2>
+            </div>
+        {% endif %}
+
+        <div class="crm-modal__body {{ body_classes|default('') }}">
+            {% block content %}{% endblock %}
+        </div>
+
+        {% if footer|default(false) %}
+            <footer class="crm-modal__footer {{ footer_classes|default('') }}">
+                {% block footer %}{% endblock %}
+            </footer>
+        {% endif %}
+    </section>
+</div>

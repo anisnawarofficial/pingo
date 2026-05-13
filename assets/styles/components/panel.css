@@ -1,0 +1,67 @@
+.crm-panel {
+    width: 100%;
+    padding: var(--space-6);
+    border: 1px solid rgba(222, 216, 238, 0.76);
+    border-radius: var(--radius-panel);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+}
+
+.crm-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.crm-panel__title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.crm-panel__title h1,
+.crm-panel__title h2,
+.crm-panel__title h3 {
+    margin: 0;
+    color: var(--color-primary-dark);
+    font-size: var(--font-size-lg);
+    line-height: 1.2;
+}
+
+.crm-panel__icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(141, 99, 255, 0.1);
+    color: var(--color-primary);
+}
+
+.crm-panel__body {
+    min-width: 0;
+}
+
+.crm-panel__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.crm-panel .icon-wrapper {
+    color: currentColor;
+}
+
+@media (max-width: 640px) {
+    .crm-panel {
+        padding: var(--space-4);
+    }
+
+    .crm-panel__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

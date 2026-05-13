@@ -1,0 +1,41 @@
+.dashboard-shell {
+    min-height: 100svh;
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--dashboard-shell-padding);
+    background: var(--color-bg-dashboard);
+    color: var(--color-text);
+}
+
+.dashboard-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-content {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.dashboard-content--consultation-list {
+    gap: 36px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-shell {
+        flex-direction: column;
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-content {
+        gap: var(--space-4);
+    }
+}

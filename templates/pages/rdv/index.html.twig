@@ -127,10 +127,13 @@
 ] %}
 
 {% block body %}
-<div class="rdv-page" data-rdv-page>
-    {% include 'components/dashboard/sidebar.html.twig' with { active_label: 'Consultation' } only %}
-
-    <main class="rdv-main">
+{% embed 'components/dashboard/layout.html.twig' with {
+    page_classes: 'rdv-page',
+    main_classes: 'rdv-main',
+    content_classes: 'dashboard-content--rdv',
+    active_label: 'Consultation'
+} %}
+    {% block content %}
         <section class="rdv-stats" aria-label="Indicateurs du jour">
             {% for card in stat_cards %}
                 {% set card_tag = card.view|default(false) ? 'button' : 'article' %}
@@ -158,7 +161,12 @@
             {% endfor %}
         </section>
 
-        <section class="rdv-panel" data-rdv-panel>
+        {% embed 'components/ui/panel.html.twig' with {
+            extra_classes: 'rdv-panel',
+            attrs: { 'data-rdv-panel': true },
+            use_body: false
+        } %}
+            {% block content %}
             <div class="rdv-panel__views" aria-live="polite">
                 <div class="rdv-panel__view is-active" id="rdv-panel-rdv" data-rdv-panel-view="rdv" aria-labelledby="rdv-list-title">
                     <header class="rdv-panel__header">
@@ -168,85 +176,60 @@
                 <h1 id="rdv-list-title">Liste des rendez-vous du jour</h1>
             </header>
 
-            <div class="rdv-panel__controls">
-                <label class="rdv-show-count">
-                    <span>Afficher</span>
-                    <select aria-label="Nombre d’éléments affichés">
-                        <option selected>5</option>
-                        <option>10</option>
-                        <option>25</option>
-                    </select>
-                    <span>éléments</span>
-                </label>
+            {% include 'components/ui/table-controls.html.twig' with {
+                extra_classes: 'rdv-panel__controls',
+                limit_classes: 'rdv-show-count',
+                search_classes: 'rdv-search',
+                per_page: 5,
+                search_placeholder: 'Rechercher...',
+                search_aria_label: 'Rechercher un rendez-vous'
+            } only %}
 
-                <label class="rdv-search">
-                    <span class="rdv-search__icon">
-                        {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'md' } only %}
-                    </span>
-                    <input type="search" placeholder="Rechercher..." aria-label="Rechercher un rendez-vous">
-                </label>
-            </div>
-
-            <div class="rdv-table" role="table" aria-label="Liste des rendez-vous">
-                <div class="rdv-table__head" role="row">
-                    <span role="columnheader">Client</span>
-                    <span role="columnheader">Tel</span>
-                    <span role="columnheader">Voyant</span>
-                    <span role="columnheader">Heure</span>
-                    <span role="columnheader">Historique</span>
-                    <span role="columnheader">Consultant</span>
-                    <span role="columnheader">Status</span>
-                    <span role="columnheader">Détails</span>
+            <div class="rdv-table crm-table crm-table-scroll" role="table" aria-label="Liste des rendez-vous" style="--table-columns: 1.25fr 1fr 1.05fr 0.72fr 1.78fr 1.05fr 0.8fr 0.68fr;">
+                <div class="rdv-table__head crm-table__header" role="row">
+                    <span class="crm-table__cell" role="columnheader">Client</span>
+                    <span class="crm-table__cell" role="columnheader">Tel</span>
+                    <span class="crm-table__cell" role="columnheader">Voyant</span>
+                    <span class="crm-table__cell" role="columnheader">Heure</span>
+                    <span class="crm-table__cell" role="columnheader">Historique</span>
+                    <span class="crm-table__cell" role="columnheader">Consultant</span>
+                    <span class="crm-table__cell" role="columnheader">Status</span>
+                    <span class="crm-table__cell" role="columnheader">Détails</span>
                 </div>
 
-                <div class="rdv-table__body">
+                <div class="rdv-table__body crm-table__body">
                     {% for row in appointment_rows %}
-                        <article class="rdv-table__row" role="row">
-                            <span role="cell" data-label="Client">{{ row.client }}</span>
-                            <span role="cell" data-label="Tel">{{ row.tel }}</span>
-                            <span role="cell" data-label="Voyant">{{ row.voyant }}</span>
-                            <span role="cell" data-label="Heure">{{ row.heure }}</span>
-                            <span role="cell" data-label="Historique">
+                        <article class="rdv-table__row crm-table__row" role="row">
+                            <span class="crm-table__cell" role="cell" data-label="Client">{{ row.client }}</span>
+                            <span class="crm-table__cell" role="cell" data-label="Tel">{{ row.tel }}</span>
+                            <span class="crm-table__cell" role="cell" data-label="Voyant">{{ row.voyant }}</span>
+                            <span class="crm-table__cell" role="cell" data-label="Heure">{{ row.heure }}</span>
+                            <span class="crm-table__cell" role="cell" data-label="Historique">
                                 <span class="rdv-history">
                                     {% for entry in row.history %}
                                         <span>{{ entry }}</span>
                                     {% endfor %}
                                 </span>
                             </span>
-                            <span role="cell" data-label="Consultant">{{ row.consultant }}</span>
-                            <span role="cell" data-label="Status">
+                            <span class="crm-table__cell" role="cell" data-label="Consultant">{{ row.consultant }}</span>
+                            <span class="crm-table__cell" role="cell" data-label="Status">
                                 <span class="rdv-status {{ row.statusClass }}">{{ row.status }}</span>
                             </span>
-                            <span role="cell" data-label="Détails">
-                                <button class="rdv-detail-button{% if row.detailFilled %} is-filled{% endif %}" type="button">
-                                    {% include 'components/ui/icon.html.twig' with { name: 'user', size: 'sm' } only %}
-                                    <span>{{ row.detail }}</span>
-                                </button>
+                            <span class="crm-table__cell" role="cell" data-label="Détails">
+                                {% include 'components/ui/info-pill.html.twig' with {
+                                    label: row.detail,
+                                    icon: 'user',
+                                    active: row.detailFilled,
+                                    active_class: 'is-filled',
+                                    extra_classes: 'rdv-detail-button'
+                                } only %}
                             </span>
                         </article>
                     {% endfor %}
                 </div>
             </div>
 
-            <footer class="rdv-panel__footer">
-                <p>Affichage de l’élément # à # sur 12 éléments</p>
-
-                <nav class="rdv-pagination" aria-label="Pagination">
-                    <a href="#" aria-label="Page précédente">
-                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
-                    </a>
-                    <a class="is-active" href="#">1</a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <span>...</span>
-                    <a href="#">12</a>
-                    <a href="#" aria-label="Page suivante">
-                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
-                    </a>
-                </nav>
-
-                <a class="rdv-panel__show-all" href="#">Afficher tout</a>
-            </footer>
+            {% include 'components/ui/pagination.html.twig' only %}
                 </div>
 
                 <div class="rdv-panel__view" id="rdv-panel-echeances" data-rdv-panel-view="echeances" aria-labelledby="echeances-list-title" aria-hidden="true" inert>
@@ -257,75 +240,53 @@
                         <h1 id="echeances-list-title">Liste des Echéances du jour</h1>
                     </header>
 
-                    <div class="rdv-panel__controls">
-                        <label class="rdv-show-count">
-                            <span>Afficher</span>
-                            <select aria-label="Nombre d’éléments affichés">
-                                <option selected>4</option>
-                                <option>10</option>
-                                <option>25</option>
-                            </select>
-                            <span>éléments</span>
-                        </label>
+                    {% include 'components/ui/table-controls.html.twig' with {
+                        extra_classes: 'rdv-panel__controls',
+                        limit_classes: 'rdv-show-count',
+                        search_classes: 'rdv-search',
+                        per_page: 4,
+                        per_page_options: [4, 10, 25],
+                        search_placeholder: 'Rechercher...',
+                        search_aria_label: 'Rechercher une échéance'
+                    } only %}
 
-                        <label class="rdv-search">
-                            <span class="rdv-search__icon">
-                                {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'md' } only %}
-                            </span>
-                            <input type="search" placeholder="Rechercher..." aria-label="Rechercher une échéance">
-                        </label>
-                    </div>
-
-                    <div class="rdv-table rdv-table--echeances" role="table" aria-label="Liste des Echéances">
-                        <div class="rdv-table__head" role="row">
-                            <span role="columnheader">Client</span>
-                            <span role="columnheader">Tel</span>
-                            <span role="columnheader">Voyant</span>
-                            <span role="columnheader">Consultant</span>
-                            <span role="columnheader">Status</span>
-                            <span role="columnheader">Détails</span>
+                    <div class="rdv-table rdv-table--echeances crm-table crm-table-scroll" role="table" aria-label="Liste des Echéances" style="--table-columns: 1.35fr 1fr 1fr 1fr 0.72fr 0.58fr;">
+                        <div class="rdv-table__head crm-table__header" role="row">
+                            <span class="crm-table__cell" role="columnheader">Client</span>
+                            <span class="crm-table__cell" role="columnheader">Tel</span>
+                            <span class="crm-table__cell" role="columnheader">Voyant</span>
+                            <span class="crm-table__cell" role="columnheader">Consultant</span>
+                            <span class="crm-table__cell" role="columnheader">Status</span>
+                            <span class="crm-table__cell" role="columnheader">Détails</span>
                         </div>
 
-                        <div class="rdv-table__body">
+                        <div class="rdv-table__body crm-table__body">
                             {% for row in echeance_rows %}
-                                <article class="rdv-table__row{% if row.featured|default(false) %} is-featured{% endif %}" role="row">
-                                    <span role="cell" data-label="Client">{{ row.client }}</span>
-                                    <span role="cell" data-label="Tel">{{ row.tel }}</span>
-                                    <span role="cell" data-label="Voyant">{{ row.voyant }}</span>
-                                    <span role="cell" data-label="Consultant">{{ row.consultant }}</span>
-                                    <span role="cell" data-label="Status">{{ row.status }}</span>
-                                    <span role="cell" data-label="Détails">
-                                        <button class="rdv-detail-button rdv-detail-button--icon{% if row.detailFilled %} is-info-filled{% endif %}" type="button" aria-label="Voir les détails">
-                                            {% include 'components/ui/icon.html.twig' with { name: 'eye', size: 'sm' } only %}
-                                        </button>
+                                <article class="rdv-table__row crm-table__row{% if row.featured|default(false) %} is-featured crm-table__row--active{% endif %}" role="row">
+                                    <span class="crm-table__cell" role="cell" data-label="Client">{{ row.client }}</span>
+                                    <span class="crm-table__cell" role="cell" data-label="Tel">{{ row.tel }}</span>
+                                    <span class="crm-table__cell" role="cell" data-label="Voyant">{{ row.voyant }}</span>
+                                    <span class="crm-table__cell" role="cell" data-label="Consultant">{{ row.consultant }}</span>
+                                    <span class="crm-table__cell" role="cell" data-label="Status">{{ row.status }}</span>
+                                    <span class="crm-table__cell" role="cell" data-label="Détails">
+                                        {% include 'components/ui/info-pill.html.twig' with {
+                                            icon: 'eye',
+                                            active: row.detailFilled,
+                                            active_class: 'is-info-filled',
+                                            extra_classes: 'rdv-detail-button rdv-detail-button--icon',
+                                            aria_label: 'Voir les détails'
+                                        } only %}
                                     </span>
                                 </article>
                             {% endfor %}
                         </div>
                     </div>
 
-                    <footer class="rdv-panel__footer">
-                        <p>Affichage de l’élément # à # sur 12 éléments</p>
-
-                        <nav class="rdv-pagination" aria-label="Pagination">
-                            <a href="#" aria-label="Page précédente">
-                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
-                            </a>
-                            <a class="is-active" href="#">1</a>
-                            <a href="#">2</a>
-                            <a href="#">3</a>
-                            <span>...</span>
-                            <a href="#">12</a>
-                            <a href="#" aria-label="Page suivante">
-                                {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
-                            </a>
-                        </nav>
-
-                        <a class="rdv-panel__show-all" href="#">Afficher tout</a>
-                    </footer>
+                    {% include 'components/ui/pagination.html.twig' only %}
                 </div>
             </div>
-        </section>
-    </main>
-</div>
+            {% endblock %}
+        {% endembed %}
+    {% endblock %}
+{% endembed %}
 {% endblock %}

@@ -1,0 +1,41 @@
+{% set action_tag = action_href|default(false) ? 'a' : 'button' %}
+{% set action_attributes = action_attrs|default({}) %}
+{% set has_action = action_label|default(false) or action_icon|default(false) %}
+
+<header class="page-header {{ extra_classes|default('') }}">
+    <div class="page-header__left {{ left_classes|default('') }}">
+        {% if icon|default(false) %}
+            <span class="page-header__icon {{ icon_classes|default('') }}">
+                {% include 'components/ui/icon.html.twig' with { name: icon, size: icon_size|default('lg'), variant: icon_variant|default('primary') } only %}
+            </span>
+        {% endif %}
+
+        <div class="page-header__text {{ text_classes|default('') }}">
+            <h1 class="page-header__title {{ title_classes|default('') }}">{{ title }}</h1>
+            {% if subtitle|default(false) %}
+                <p class="page-header__subtitle {{ subtitle_classes|default('') }}">{{ subtitle }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if has_action %}
+        <{{ action_tag }}
+            class="page-header__action btn {{ action_classes|default('btn-outline-purple') }}"
+            {% if action_tag == 'a' %}
+                href="{{ action_href }}"
+            {% else %}
+                type="{{ action_type|default('button') }}"
+            {% endif %}
+            {% for attr, value in action_attributes %}
+                {{ attr }}{% if value is not same as(false) and value is not same as(null) %}="{{ value }}"{% endif %}
+            {% endfor %}
+        >
+            {% if action_icon|default(false) %}
+                {% include 'components/ui/icon.html.twig' with { name: action_icon, size: action_icon_size|default('sm') } only %}
+            {% endif %}
+            {% if action_label|default(false) %}
+                <span>{{ action_label }}</span>
+            {% endif %}
+        </{{ action_tag }}>
+    {% endif %}
+</header>

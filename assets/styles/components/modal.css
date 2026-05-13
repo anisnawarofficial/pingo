@@ -1,0 +1,108 @@
+.crm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    backdrop-filter: blur(2px);
+    transition: opacity 220ms ease;
+}
+
+.crm-modal-overlay[hidden] {
+    display: none;
+}
+
+.crm-modal-overlay.is-open {
+    opacity: 1;
+}
+
+.crm-modal {
+    width: min(900px, 100%);
+    position: relative;
+    border-radius: 28px;
+    background: var(--color-white);
+    box-shadow: var(--shadow-modal);
+    opacity: 0;
+    transform: scale(0.96);
+    transition:
+        opacity 220ms ease,
+        transform 220ms ease;
+}
+
+.crm-modal-overlay.is-open .crm-modal {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.crm-modal--medium {
+    width: min(900px, 100%);
+}
+
+.crm-modal--large {
+    width: min(1120px, calc(100vw - 80px));
+}
+
+.crm-modal__close {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-primary);
+    transition:
+        background 180ms ease,
+        transform 180ms ease;
+}
+
+.crm-modal__close:hover,
+.crm-modal__close:focus-visible {
+    background: var(--color-primary-soft);
+    transform: translateY(-1px);
+}
+
+.crm-modal__badge {
+    display: flex;
+    align-items: center;
+    background: var(--dashboard-gradient);
+    color: var(--color-white);
+    box-shadow: 0 14px 28px rgba(110, 75, 231, 0.24);
+}
+
+.crm-modal__badge h2 {
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+}
+
+.crm-modal__body {
+    min-width: 0;
+}
+
+.crm-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.crm-modal .icon-wrapper {
+    color: currentColor;
+}
+
+body.has-modal-open {
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .crm-modal-overlay {
+        padding: var(--space-4);
+    }
+
+    .crm-modal {
+        border-radius: 22px;
+    }
+}

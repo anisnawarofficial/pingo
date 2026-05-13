@@ -1,0 +1,25 @@
+{% set current = current_page|default(1) %}
+{% set total = total_pages|default(12) %}
+{% set pages = pages|default([1, 2, 3]) %}
+
+<footer class="crm-pagination {{ extra_classes|default('rdv-panel__footer') }}">
+    <p class="crm-pagination__summary">{{ summary_text|default('Affichage de lâ€™Ã©lÃ©ment # Ã  # sur 12 Ã©lÃ©ments') }}</p>
+
+    <nav class="crm-pagination__pages {{ pages_classes|default('rdv-pagination') }}" aria-label="{{ aria_label|default('Pagination') }}">
+        <a class="crm-pagination__page" href="{{ previous_href|default('#') }}" aria-label="{{ previous_label|default('Page prÃ©cÃ©dente') }}">
+            {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
+        </a>
+        {% for page in pages %}
+            <a class="crm-pagination__page{% if page == current %} crm-pagination__page--active is-active{% endif %}" href="{{ page_hrefs[page]|default('#') }}">{{ page }}</a>
+        {% endfor %}
+        {% if show_ellipsis|default(true) %}
+            <span class="crm-pagination__page crm-pagination__ellipsis">...</span>
+        {% endif %}
+        <a class="crm-pagination__page{% if total == current %} crm-pagination__page--active is-active{% endif %}" href="{{ page_hrefs[total]|default('#') }}">{{ total }}</a>
+        <a class="crm-pagination__page" href="{{ next_href|default('#') }}" aria-label="{{ next_label|default('Page suivante') }}">
+            {% include 'components/ui/icon.html.twig' with { name: 'chevron-right', size: 'sm' } only %}
+        </a>
+    </nav>
+
+    <a class="crm-pagination__show-all {{ show_all_classes|default('rdv-panel__show-all') }}" href="{{ show_all_href|default('#') }}">{{ show_all_label|default('Afficher tout') }}</a>
+</footer>

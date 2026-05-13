@@ -1,0 +1,53 @@
+{% set panel_attrs = attrs|default({}) %}
+{% set has_header = title|default(false) or icon|default(false) or header_action_label|default(false) %}
+{% set header_action_tag = header_action_href|default(false) ? 'a' : 'button' %}
+{% set panel_content %}
+    {% block content %}{% endblock %}
+{% endset %}
+
+<section class="crm-panel {{ extra_classes|default('') }}"
+    {% for attr, value in panel_attrs %}
+        {{ attr }}{% if value is not same as(false) and value is not same as(null) and value is not same as(true) %}="{{ value }}"{% endif %}
+    {% endfor %}
+>
+    {% if has_header %}
+        <header class="crm-panel__header {{ header_classes|default('') }}">
+            <div class="crm-panel__title">
+                {% if icon|default(false) %}
+                    <span class="crm-panel__icon {{ icon_classes|default('') }}">
+                        {% include 'components/ui/icon.html.twig' with { name: icon, size: icon_size|default('lg'), variant: icon_variant|default('primary') } only %}
+                    </span>
+                {% endif %}
+                {% if title|default(false) %}
+                    <{{ title_tag|default('h2') }} class="{{ title_classes|default('') }}">{{ title }}</{{ title_tag|default('h2') }}>
+                {% endif %}
+            </div>
+
+            {% if header_action_label|default(false) %}
+                <div class="crm-panel__actions">
+                    <{{ header_action_tag }}
+                        class="btn {{ header_action_classes|default('btn-outline-purple') }}"
+                        {% if header_action_tag == 'a' %}
+                            href="{{ header_action_href }}"
+                        {% else %}
+                            type="button"
+                        {% endif %}
+                    >
+                        {% if header_action_icon|default(false) %}
+                            {% include 'components/ui/icon.html.twig' with { name: header_action_icon, size: 'sm' } only %}
+                        {% endif %}
+                        <span>{{ header_action_label }}</span>
+                    </{{ header_action_tag }}>
+                </div>
+            {% endif %}
+        </header>
+    {% endif %}
+
+    {% if use_body|default(true) %}
+        <div class="crm-panel__body {{ body_classes|default('') }}">
+            {{ panel_content|raw }}
+        </div>
+    {% else %}
+        {{ panel_content|raw }}
+    {% endif %}
+</section>

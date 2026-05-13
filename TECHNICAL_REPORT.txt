@@ -1,0 +1,617 @@
+TECHNICAL REPORT - PIN'GO CRM PROJECT ARCHITECTURE
+Generated on: 2026-05-13
+Workspace: C:\Users\Owllabs\Desktop\pingo
+
+1. EXECUTIVE SUMMARY
+
+Pin'Go CRM is a Symfony 6.4 LTS web application currently structured as a
+Twig-rendered CRM interface. The project has a standard Symfony backend,
+frontend assets managed by Symfony Asset Mapper/importmap, and a PostgreSQL
+database configuration prepared through Doctrine.
+
+At the current stage, the application behaves mainly as a UI prototype:
+controllers render Twig templates, the page data is mostly hardcoded inside
+Twig files, and there are no committed domain entities, repositories,
+migrations, forms, or business services yet.
+
+Main application areas:
+- Login page
+- Rendez-vous dashboard
+- Client management page
+- Consultation list page
+- Consultation detail page
+- Reusable sidebar, logo, and icon Twig components
+
+2. TECHNOLOGY STACK
+
+Backend:
+- PHP >= 8.1 required by composer.json
+- Symfony 6.4.38 LTS
+- Symfony Runtime
+- Symfony FrameworkBundle
+- Symfony Routing with PHP attributes
+- Symfony TwigBundle
+- Symfony SecurityBundle
+- Symfony Messenger
+- Symfony Mailer and Notifier
+- Symfony Monolog
+- Doctrine ORM 3.x
+- Doctrine DBAL
+- Doctrine Migrations
+
+Frontend:
+- Twig templates
+- Symfony Asset Mapper
+- Symfony importmap
+- Vanilla JavaScript
+- Symfony UX Turbo
+- Symfony UX Stimulus
+- Lucide icon library
+- CSS split by settings, base, components, and page layouts
+
+Development and testing:
+- PHPUnit 9.5 configured
+- Symfony Web Profiler enabled in dev/test
+- Symfony MakerBundle enabled in dev
+- Docker Compose service for PostgreSQL
+- Docker Compose override service for Mailpit
+
+3. HIGH-LEVEL ARCHITECTURE
+
+Request flow:
+
+Browser
+  -> public/index.php
+  -> Symfony Runtime
+  -> App\Kernel
+  -> Routing from config/routes.yaml
+  -> Attribute routes in src/Controller/*
+  -> Controller action
+  -> Twig template in templates/pages/*
+  -> base.html.twig layout
+  -> reusable Twig components
+  -> Asset Mapper importmap entrypoint assets/app.js
+  -> CSS and JavaScript behavior in assets/
+
+Current dependency direction:
+
+Controller layer
+  -> renders Twig views
+  -> does not yet call services, repositories, forms, or entities
+
+View layer
+  -> owns most current page content
+  -> contains hardcoded mock CRM data arrays
+  -> composes reusable components
+
+Frontend layer
+  -> initializes Lucide icons
+  -> controls sidebar collapse/open state
+  -> toggles rendez-vous/echeance panels
+  -> opens/closes history and payment modals
+
+Database layer
+  -> Doctrine configuration exists
+  -> PostgreSQL configuration exists
+  -> migrations directory exists
+  -> no actual entity, repository, or migration files are committed yet
+
+4. PROJECT DIRECTORY MAP
+
+Root:
+- composer.json
+  Defines PHP/Symfony dependencies, autoloading, and Symfony Flex scripts.
+
+- composer.lock
+  Locked PHP dependency versions.
+
+- symfony.lock
+  Symfony Flex recipe lock file.
+
+- importmap.php
+  Asset Mapper/importmap dependency map.
+
+- phpunit.xml.dist
+  PHPUnit test suite configuration.
+
+- compose.yaml
+  PostgreSQL database service definition.
+
+- compose.override.yaml
+  Local development overrides, including exposed database port and Mailpit.
+
+- .env
+  Default environment values for APP_ENV, DATABASE_URL, Messenger, and Mailer.
+
+- public/
+  Public web root.
+
+- src/
+  Application PHP source code.
+
+- templates/
+  Twig layout, pages, and components.
+
+- assets/
+  JavaScript and CSS frontend source.
+
+- config/
+  Symfony application configuration.
+
+- migrations/
+  Doctrine migration location, currently empty except .gitignore.
+
+- tests/
+  PHPUnit bootstrap location, currently no committed test classes.
+
+- vendor/
+  Installed Composer dependencies.
+
+5. BACKEND ARCHITECTURE
+
+5.1 Kernel
+
+File:
+- src/Kernel.php
+
+The project uses the standard Symfony Kernel with MicroKernelTrait. Application
+configuration is loaded from config/ and bundles are registered through
+config/bundles.php.
+
+5.2 Service container
+
+File:
+- config/services.yaml
+
+Service configuration uses Symfony defaults:
+- autowire: true
+- autoconfigure: true
+- App\ namespace loaded from src/
+
+Excluded from automatic service registration:
+- src/DependencyInjection/
+- src/Entity/
+- src/Kernel.php
+
+There are currently no custom services defined explicitly.
+
+5.3 Controllers
+
+Controllers are located in:
+- src/Controller/
+
+Routes are configured by attributes and loaded by:
+- config/routes.yaml
+
+Controller summary:
+
+- SecurityController
+  Routes:
+  - GET/ANY /        -> redirects to app_login
+  - GET/ANY /login   -> renders pages/security/login.html.twig
+
+- RdvController
+  Routes:
+  - GET/ANY /rdv     -> renders pages/rdv/index.html.twig
+
+- ClientController
+  Routes:
+  - GET/ANY /fiche-clients -> renders pages/clients/index.html.twig
+
+- ConsultationController
+  Routes:
+  - GET/ANY /consultation/en-communication
+  - GET/ANY /consultation/details
+
+Current controller behavior:
+- Very thin presentation controllers.
+- No request validation yet.
+- No form handling yet.
+- No database access yet.
+- No domain/service orchestration yet.
+
+5.4 Runtime route table
+
+Application routes confirmed by Symfony console:
+
+- app_home
+  Path: /
+  Controller: App\Controller\SecurityController::home()
+
+- app_login
+  Path: /login
+  Controller: App\Controller\SecurityController::login()
+
+- app_rdv
+  Path: /rdv
+  Controller: App\Controller\RdvController::index()
+
+- app_clients
+  Path: /fiche-clients
+  Controller: App\Controller\ClientController::index()
+
+- app_consultation_en_communication
+  Path: /consultation/en-communication
+  Controller: App\Controller\ConsultationController::enCommunication()
+
+- app_consultation_details
+  Path: /consultation/details
+  Controller: App\Controller\ConsultationController::details()
+
+Dev-only profiler/error routes are also available in the dev environment.
+
+6. VIEW AND TEMPLATE ARCHITECTURE
+
+6.1 Base layout
+
+File:
+- templates/base.html.twig
+
+Responsibilities:
+- Defines the HTML document structure.
+- Sets lang="fr".
+- Defines title, stylesheets, javascripts, importmap, and body blocks.
+- Loads the importmap entrypoint "app" by default.
+
+6.2 Page templates
+
+Page templates are stored in:
+- templates/pages/
+
+Pages:
+
+- templates/pages/security/login.html.twig
+  Login UI with email/password fields, remember checkbox, logo, and static form
+  action.
+
+- templates/pages/rdv/index.html.twig
+  Rendez-vous dashboard with statistic cards, appointment table, echeance
+  table, pagination, search controls, and view toggling.
+
+- templates/pages/clients/index.html.twig
+  Client management page with search form, tabs/date range, client table,
+  pagination, and row actions.
+
+- templates/pages/consultation/en-communication.html.twig
+  Consultation list page with export buttons, search, table, and pagination.
+
+- templates/pages/consultation/details.html.twig
+  Consultation detail page with client information, rendez-vous management,
+  comments, history modal, and payment mode modal.
+
+6.3 Reusable Twig components
+
+Component templates are stored in:
+- templates/components/
+
+Components:
+
+- templates/components/ui/icon.html.twig
+  Generic Lucide icon wrapper. It outputs an element with data-lucide and CSS
+  classes based on size and variant.
+
+- templates/components/auth/brand-logo.html.twig
+  Shared brand/logo component.
+
+- templates/components/dashboard/sidebar.html.twig
+  Main CRM sidebar. It defines navigation items in Twig, highlights the active
+  section, handles submenu markup, and uses the generic icon component.
+
+6.4 Current data ownership
+
+Most displayed CRM data is currently hardcoded directly in Twig arrays:
+- rendez-vous statistics
+- appointment rows
+- echeance rows
+- clients
+- consultation rows
+- consultation detail rows
+- payment rows
+
+This means the current view layer is responsible for both layout and mock data.
+A production version should move this data into controllers, DTOs, services,
+repositories, or view models.
+
+7. FRONTEND ASSET ARCHITECTURE
+
+7.1 Asset entrypoint
+
+File:
+- assets/app.js
+
+Responsibilities:
+- Imports assets/styles/app.css.
+- Imports Lucide icons.
+- Registers the icons used by the application.
+- Calls createIcons() to render data-lucide elements.
+- Initializes page interactions:
+  - sidebar collapse/expand
+  - sidebar submenu accessibility state
+  - rendez-vous/echeance panel switching
+  - history modal
+  - payment modal
+
+7.2 Stimulus bootstrap
+
+File:
+- assets/bootstrap.js
+
+Starts Symfony Stimulus application. The only custom controller currently
+present is the generated example:
+- assets/controllers/hello_controller.js
+
+The example controller is not part of the current CRM behavior.
+
+7.3 Importmap
+
+File:
+- importmap.php
+
+Entrypoint:
+- app -> ./assets/app.js
+
+Imported packages:
+- @hotwired/stimulus
+- @symfony/stimulus-bundle
+- @hotwired/turbo
+- lucide
+
+7.4 CSS organization
+
+Main stylesheet:
+- assets/styles/app.css
+
+Import order:
+- settings/variables.css
+- base/reset.css
+- components/icon.css
+- components/logo.css
+- layouts/login.css
+- layouts/rdv.css
+- layouts/clients.css
+- layouts/consultation.css
+
+CSS responsibilities:
+
+- assets/styles/settings/variables.css
+  Design tokens for colors, typography, spacing, radii, shadows, login layout,
+  dashboard layout, and status colors.
+
+- assets/styles/base/reset.css
+  Base reset styles.
+
+- assets/styles/components/icon.css
+  Icon wrapper sizing and color variants.
+
+- assets/styles/components/logo.css
+  Logo component styles.
+
+- assets/styles/layouts/login.css
+  Login page layout and form styling.
+
+- assets/styles/layouts/rdv.css
+  Dashboard shell, sidebar, rendez-vous cards, tables, pagination, and panel
+  styles.
+
+- assets/styles/layouts/clients.css
+  Client management page styles.
+
+- assets/styles/layouts/consultation.css
+  Consultation list/detail pages and modal styles.
+
+8. DATABASE AND PERSISTENCE ARCHITECTURE
+
+8.1 Doctrine configuration
+
+File:
+- config/packages/doctrine.yaml
+
+Current configuration:
+- DBAL URL comes from DATABASE_URL.
+- ORM auto_mapping enabled.
+- Entity mapping points to src/Entity.
+- Attribute mapping is configured.
+- Naming strategy is underscore_number_aware.
+- Lazy ghost objects are enabled.
+
+8.2 Migrations
+
+File:
+- config/packages/doctrine_migrations.yaml
+
+Migrations namespace/path:
+- DoctrineMigrations -> migrations/
+
+Current state:
+- migrations/ exists.
+- No migration classes are committed.
+
+8.3 Entities and repositories
+
+Current state:
+- src/Entity/ exists but contains no entity classes.
+- src/Repository/ exists but contains no repository classes.
+
+Expected future domain entities based on the UI:
+- User or employee/account
+- Client
+- RendezVous
+- Consultation
+- PaymentMethod
+- Payment
+- Comment
+- HistoryEvent
+- Package/Forfait
+- Consultant/Voyant
+
+These are inferred from UI names only; no database model is implemented yet.
+
+9. SECURITY ARCHITECTURE
+
+File:
+- config/packages/security.yaml
+
+Current state:
+- Symfony SecurityBundle is installed.
+- Password hasher is configured for PasswordAuthenticatedUserInterface.
+- Provider is users_in_memory with no users.
+- Main firewall is lazy.
+- No login authenticator is configured.
+- No access_control rules are active.
+- Login form in Twig currently posts to "#".
+
+Implication:
+The visible login screen is currently a static UI, not a working authentication
+flow. Production authentication still needs:
+- User entity/provider
+- Login form authenticator
+- CSRF protection
+- Password hashing flow
+- Logout route
+- Access rules for CRM pages
+
+10. MESSAGING, MAIL, AND NOTIFICATIONS
+
+Messenger:
+- config/packages/messenger.yaml
+- async transport reads MESSENGER_TRANSPORT_DSN
+- failed transport uses Doctrine queue named "failed"
+- Mailer and Notifier messages are routed async
+
+Mailer:
+- config/packages/mailer.yaml
+- MAILER_DSN comes from environment
+- Default .env value is null://null
+
+Notifier:
+- config/packages/notifier.yaml exists
+
+Current state:
+- Messaging infrastructure is configured.
+- No custom application messages or handlers are committed yet.
+
+11. DOCKER AND LOCAL SERVICES
+
+Docker Compose database service:
+- PostgreSQL image: postgres:${POSTGRES_VERSION:-16}-alpine
+- Default database: app
+- Default user: app
+- Default local password value exists in compose.yaml and should be changed
+  before production use.
+- Data volume: database_data
+
+Docker Compose override:
+- Exposes PostgreSQL port.
+- Adds Mailpit service.
+- Mailpit ports:
+  - SMTP: 1025
+  - UI: 8025
+
+12. TESTING AND QUALITY SETUP
+
+Testing files:
+- phpunit.xml.dist
+- tests/bootstrap.php
+
+Current state:
+- PHPUnit is configured.
+- Symfony PHPUnit bridge is installed.
+- No actual test classes are committed.
+
+Validation performed during this report:
+- Symfony route table checked with PHP 8.3.
+- Symfony about command checked with PHP 8.3.
+- Twig lint passed for all 9 Twig files.
+- YAML lint passed for all 21 YAML files.
+- Container lint passed successfully.
+
+Command notes:
+- The default php command on PATH is PHP 7.4.33, which is incompatible with
+  this project because composer.json requires PHP >= 8.1.
+- The WAMP PHP 8.3.28 binary successfully booted Symfony.
+- Doctrine migration status could not be checked because the PHP 8.3 runtime
+  used by the command reported "could not find driver", indicating a missing
+  PDO database driver for the configured database.
+
+13. CURRENT APPLICATION LIMITATIONS
+
+Architecture limitations:
+- No domain model is implemented yet.
+- No database tables/migrations are implemented yet.
+- No repositories are implemented yet.
+- No application services are implemented yet.
+- Controllers do not pass dynamic data to Twig.
+- Twig templates contain mock data arrays.
+- Login is not connected to Symfony authentication.
+- Forms post to placeholder "#".
+- Search, filters, pagination, export, edit, delete, add, payment, and modal
+  actions are UI-only at the moment.
+- Stimulus is installed but not used for the current CRM interactions.
+- A generated example Stimulus controller remains in assets/controllers.
+
+Environment limitations:
+- PATH php is 7.4.33 and cannot run the project.
+- PHP 8.3 is available through WAMP but appears to miss the database PDO driver.
+- Xdebug tries to log to c:/wamp64/logs/xdebug.log, but that file could not be
+  opened during console commands.
+
+14. RECOMMENDED NEXT ARCHITECTURE STEPS
+
+1. Fix local runtime alignment
+   - Put PHP 8.3 or another PHP >= 8.1 binary first on PATH.
+   - Enable the PostgreSQL PDO driver for that PHP runtime.
+   - Ensure Xdebug log path exists or disable Xdebug for normal development.
+
+2. Implement authentication
+   - Create User entity.
+   - Configure a Doctrine user provider.
+   - Add Symfony login authenticator.
+   - Add logout route.
+   - Protect CRM routes with ROLE_USER or more specific roles.
+
+3. Introduce the domain model
+   - Add entities for Client, RendezVous, Consultation, PaymentMethod,
+     Payment, Comment, HistoryEvent, Consultant/Voyant, and Forfait as needed.
+   - Generate Doctrine migrations.
+   - Replace hardcoded Twig arrays with database-backed data.
+
+4. Add application services
+   - Keep controllers thin.
+   - Move workflow logic into services such as ClientService,
+     RendezVousService, ConsultationService, PaymentService, and HistoryService.
+
+5. Add forms and validation
+   - Use Symfony Forms for login/auth flows, client search, client edit/add,
+     consultation edit/add, comments, and payment methods.
+   - Add validation constraints to entities or DTOs.
+
+6. Move page interaction logic into Stimulus
+   - Sidebar controller
+   - Panel toggle controller
+   - Modal controller
+   - Table/search/filter controller if needed
+
+7. Add tests
+   - Controller smoke tests for public routes.
+   - Security tests for protected routes after authentication is implemented.
+   - Entity/repository tests for core persistence behavior.
+   - Service tests for CRM workflows.
+
+15. FINAL ARCHITECTURE SNAPSHOT
+
+The project is currently best described as:
+
+Symfony 6.4 CRM UI prototype
+  -> Thin attribute-based controllers
+  -> Twig-rendered page templates
+  -> Shared Twig sidebar/icon/logo components
+  -> Asset Mapper/importmap frontend
+  -> Vanilla JS UI behaviors
+  -> CSS design tokens and page layouts
+  -> Doctrine/PostgreSQL infrastructure prepared
+  -> Security/Messenger/Mailer installed but not yet application-integrated
+
+The foundation is clean and recognizable as a standard Symfony application.
+The next major architectural milestone is moving from static Twig mock data to
+a real domain/data layer with authentication, database entities, forms,
+services, and tests.

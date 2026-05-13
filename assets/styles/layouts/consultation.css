@@ -159,14 +159,6 @@
     border-radius: 15px;
 }
 
-.consultation-panel {
-    padding: var(--space-6);
-    border: 1px solid rgba(222, 216, 238, 0.76);
-    border-radius: var(--dashboard-panel-radius);
-    background: var(--dashboard-surface);
-    box-shadow: var(--dashboard-shadow);
-}
-
 .consultation-card-header,
 .consultation-section-header {
     display: flex;
@@ -1458,10 +1450,6 @@
 
     .consultation-titlebar h1 {
         font-size: var(--font-size-sm);
-    }
-
-    .consultation-panel {
-        padding: var(--space-4);
     }
 
     .consultation-card-header,

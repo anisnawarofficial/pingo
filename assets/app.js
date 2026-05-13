@@ -197,107 +197,87 @@ const initRdvPanelToggle = () => {
     setView(activeToggle ? activeToggle.dataset.rdvViewToggle : 'rdv');
 };
 
-const initHistoriqueModal = () => {
-    const modalOverlay = document.querySelector('[data-historique-modal]');
-    const openButtons = Array.from(document.querySelectorAll('[data-open-historique-modal]'));
+const modalCloseTimers = new WeakMap();
 
-    if (!modalOverlay || !openButtons.length) {
+const getModalBodyClass = (modalId) => `has-${modalId}`;
+
+const getModalOverlay = (modalId) => (
+    document.querySelector(`[data-modal-overlay][data-modal-id="${modalId}"]`)
+    || document.querySelector(`[data-${modalId.replace('-modal', '')}-modal]`)
+);
+
+const openModal = (modalId) => {
+    const modalOverlay = getModalOverlay(modalId);
+
+    if (!modalOverlay) {
         return;
     }
 
-    const closeButtons = Array.from(modalOverlay.querySelectorAll('[data-close-historique-modal]'));
-    const closeButton = closeButtons[0] || null;
-    let closeTimer;
+    window.clearTimeout(modalCloseTimers.get(modalOverlay));
+    modalOverlay.hidden = false;
+    document.body.classList.add('has-modal-open', getModalBodyClass(modalId));
 
-    const openModal = () => {
-        window.clearTimeout(closeTimer);
-        modalOverlay.hidden = false;
-        document.body.classList.add('has-historique-modal');
-
-        window.requestAnimationFrame(() => {
-            modalOverlay.classList.add('is-open');
-            closeButton?.focus();
-        });
-    };
-
-    const closeModal = () => {
-        modalOverlay.classList.remove('is-open');
-        document.body.classList.remove('has-historique-modal');
-
-        closeTimer = window.setTimeout(() => {
-            modalOverlay.hidden = true;
-        }, 220);
-    };
-
-    openButtons.forEach((button) => {
-        button.addEventListener('click', openModal);
-    });
-
-    closeButtons.forEach((button) => {
-        button.addEventListener('click', closeModal);
-    });
-
-    modalOverlay.addEventListener('click', (event) => {
-        if (event.target === modalOverlay) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modalOverlay.hidden) {
-            closeModal();
-        }
+    window.requestAnimationFrame(() => {
+        modalOverlay.classList.add('is-open');
+        modalOverlay.querySelector('[data-modal-close]')?.focus();
     });
 };
 
-const initPaymentModal = () => {
-    const modalOverlay = document.querySelector('[data-payment-modal]');
-    const openButton = document.querySelector('[data-open-payment-modal]');
-
-    if (!modalOverlay || !openButton) {
+const closeModal = (modalOverlay) => {
+    if (!modalOverlay) {
         return;
     }
 
-    const closeButtons = Array.from(modalOverlay.querySelectorAll('[data-close-payment-modal]'));
-    const closeButton = closeButtons[0] || null;
-    let closeTimer;
+    const modalId = modalOverlay.dataset.modalId
+        || (modalOverlay.matches('[data-historique-modal]') ? 'historique-modal' : 'payment-modal');
 
-    const openModal = () => {
-        window.clearTimeout(closeTimer);
-        modalOverlay.hidden = false;
-        document.body.classList.add('has-payment-modal');
+    modalOverlay.classList.remove('is-open');
+    document.body.classList.remove(getModalBodyClass(modalId));
 
-        window.requestAnimationFrame(() => {
-            modalOverlay.classList.add('is-open');
-            closeButton?.focus();
+    const closeTimer = window.setTimeout(() => {
+        modalOverlay.hidden = true;
+
+        if (!document.querySelector('[data-modal-overlay].is-open')) {
+            document.body.classList.remove('has-modal-open');
+        }
+    }, 220);
+
+    modalCloseTimers.set(modalOverlay, closeTimer);
+};
+
+const initModals = () => {
+    document.querySelectorAll('[data-modal-open]').forEach((button) => {
+        button.addEventListener('click', () => {
+            openModal(button.dataset.modalOpen);
         });
-    };
-
-    const closeModal = () => {
-        modalOverlay.classList.remove('is-open');
-        document.body.classList.remove('has-payment-modal');
-
-        closeTimer = window.setTimeout(() => {
-            modalOverlay.hidden = true;
-        }, 220);
-    };
-
-    openButton.addEventListener('click', openModal);
-
-    closeButtons.forEach((button) => {
-        button.addEventListener('click', closeModal);
     });
 
-    modalOverlay.addEventListener('click', (event) => {
-        if (event.target === modalOverlay) {
-            closeModal();
-        }
+    document.querySelectorAll('[data-open-historique-modal]:not([data-modal-open])').forEach((button) => {
+        button.addEventListener('click', () => openModal('historique-modal'));
+    });
+
+    document.querySelectorAll('[data-open-payment-modal]:not([data-modal-open])').forEach((button) => {
+        button.addEventListener('click', () => openModal('payment-modal'));
+    });
+
+    document.querySelectorAll('[data-modal-overlay]').forEach((modalOverlay) => {
+        modalOverlay.querySelectorAll('[data-modal-close], [data-close-historique-modal], [data-close-payment-modal]').forEach((button) => {
+            button.addEventListener('click', () => closeModal(modalOverlay));
+        });
+
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                closeModal(modalOverlay);
+            }
+        });
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modalOverlay.hidden) {
-            closeModal();
+        if (event.key !== 'Escape') {
+            return;
         }
+
+        document.querySelectorAll('[data-modal-overlay].is-open').forEach(closeModal);
     });
 };
 
@@ -305,8 +285,7 @@ const boot = () => {
     renderIcons();
     initRdvSidebar();
     initRdvPanelToggle();
-    initHistoriqueModal();
-    initPaymentModal();
+    initModals();
 };
 
 if (document.readyState === 'loading') {

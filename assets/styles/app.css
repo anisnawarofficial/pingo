@@ -3,6 +3,14 @@
 
 @import "./components/icon.css";
 @import "./components/logo.css";
+@import "./components/dashboard-layout.css";
+@import "./components/page-header.css";
+@import "./components/panel.css";
+@import "./components/button.css";
+@import "./components/form.css";
+@import "./components/table.css";
+@import "./components/pagination.css";
+@import "./components/modal.css";
 
 @import "./layouts/login.css";
 @import "./layouts/rdv.css";

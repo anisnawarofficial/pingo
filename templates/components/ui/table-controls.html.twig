@@ -1,0 +1,31 @@
+{% set limit_classes = limit_classes|default('') %}
+{% set search_classes = search_classes|default('') %}
+{% set select_wrapper_classes = select_wrapper_classes|default('') %}
+{% set select_classes = select_classes|default('') %}
+
+<div class="table-controls {{ extra_classes|default('') }}">
+    <label class="table-controls__limit {{ limit_classes }}">
+        <span>{{ limit_label|default('Afficher') }}</span>
+        <span class="crm-select {{ select_wrapper_classes }}">
+            <select class="{{ select_classes }}" aria-label="{{ select_aria_label|default('Nombre dâ€™Ã©lÃ©ments affichÃ©s') }}">
+                {% for option in per_page_options|default([per_page|default(5), 10, 25]) %}
+                    <option{% if option == per_page|default(5) %} selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+            {% if show_select_arrows|default(false) %}
+                <span class="crm-select__icon {{ select_icon_classes|default('') }}">
+                    {% include 'components/ui/icon.html.twig' with { name: 'chevron-up', size: 'xs' } only %}
+                    {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'xs' } only %}
+                </span>
+            {% endif %}
+        </span>
+        <span>{{ elements_label|default('Ã©lÃ©ments') }}</span>
+    </label>
+
+    <label class="table-controls__search crm-search {{ search_classes }}">
+        <span class="crm-search__icon rdv-search__icon">
+            {% include 'components/ui/icon.html.twig' with { name: 'search', size: 'md' } only %}
+        </span>
+        <input type="search" name="{{ search_name|default('search') }}" placeholder="{{ search_placeholder|default('Rechercher...') }}" aria-label="{{ search_aria_label|default(search_placeholder|default('Rechercher...')) }}">
+    </label>
+</div>

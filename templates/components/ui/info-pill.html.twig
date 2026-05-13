@@ -1,0 +1,19 @@
+{% set tag = href|default(false) ? 'a' : 'button' %}
+{% set is_active = active|default(false) %}
+
+<{{ tag }}
+    class="info-pill{% if is_active %} info-pill--active {{ active_class|default('') }}{% endif %} {{ extra_classes|default('') }}"
+    {% if tag == 'a' %}
+        href="{{ href }}"
+    {% else %}
+        type="{{ type|default('button') }}"
+    {% endif %}
+    {% if aria_label|default(false) %}aria-label="{{ aria_label }}"{% endif %}
+>
+    {% if icon|default(false) %}
+        {% include 'components/ui/icon.html.twig' with { name: icon, size: icon_size|default('sm') } only %}
+    {% endif %}
+    {% if label|default(false) %}
+        <span>{{ label }}</span>
+    {% endif %}
+</{{ tag }}>

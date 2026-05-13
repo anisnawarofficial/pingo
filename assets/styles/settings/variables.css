@@ -87,6 +87,17 @@
     --dashboard-shadow-soft: 0 10px 28px rgba(39, 30, 90, 0.08);
     --dashboard-gradient: linear-gradient(135deg, #9b6dff 0%, #7b50f0 48%, #4d37b3 100%);
 
+    /* Shared CRM aliases */
+    --color-bg-dashboard: var(--dashboard-bg);
+    --color-primary-light: var(--color-primary-soft);
+    --color-sidebar: var(--dashboard-sidebar-bg);
+    --color-muted: var(--color-text-muted);
+    --shadow-soft: var(--dashboard-shadow-soft);
+    --shadow-card: var(--dashboard-shadow);
+    --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.35);
+    --radius-card: var(--dashboard-card-radius);
+    --radius-panel: var(--dashboard-panel-radius);
+
     /* Status colors */
     --color-success: #26a866;
     --color-success-soft: #eaf8f0;

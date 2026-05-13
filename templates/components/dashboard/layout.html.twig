@@ -1,0 +1,27 @@
+{% set shell_classes = ['dashboard-shell'] %}
+{% if page_classes|default(false) %}
+    {% set shell_classes = shell_classes|merge([page_classes]) %}
+{% endif %}
+
+{% set main_classes_list = ['dashboard-main'] %}
+{% if main_classes|default(false) %}
+    {% set main_classes_list = main_classes_list|merge([main_classes]) %}
+{% endif %}
+
+{% set content_classes_list = ['dashboard-content'] %}
+{% if content_classes|default(false) %}
+    {% set content_classes_list = content_classes_list|merge([content_classes]) %}
+{% endif %}
+
+<div class="{{ shell_classes|join(' ') }}" data-rdv-page>
+    {% include 'components/dashboard/sidebar.html.twig' with {
+        active_label: active_label|default('Consultation'),
+        active_submenu: active_submenu|default(null)
+    } only %}
+
+    <main class="{{ main_classes_list|join(' ') }}">
+        <div class="{{ content_classes_list|join(' ') }}">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
