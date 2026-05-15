@@ -1,18 +1,32 @@
 TECHNICAL REPORT - PIN'GO CRM PROJECT ARCHITECTURE
-Generated on: 2026-05-13
+Updated on: 2026-05-15
 Workspace: C:\Users\Owllabs\Desktop\pingo
+Local URL: http://pingo.local
 
 1. EXECUTIVE SUMMARY
 
 Pin'Go CRM is a Symfony 6.4 LTS web application currently structured as a
-Twig-rendered CRM interface. The project has a standard Symfony backend,
-frontend assets managed by Symfony Asset Mapper/importmap, and a PostgreSQL
-database configuration prepared through Doctrine.
+Twig-rendered CRM interface. The application uses thin Symfony controllers,
+reusable Twig components, Symfony Asset Mapper/importmap, vanilla JavaScript,
+and a modular CSS architecture.
 
-At the current stage, the application behaves mainly as a UI prototype:
-controllers render Twig templates, the page data is mostly hardcoded inside
-Twig files, and there are no committed domain entities, repositories,
-migrations, forms, or business services yet.
+The latest update adds development safeguards around Symfony Asset Mapper so
+local WAMP development uses dynamic assets from assets/ instead of stale
+compiled output in public/assets/. It also adds Composer helper scripts,
+documentation, and a cleanup utility for separating development and production
+asset workflows.
+
+The project is configured to run correctly under WAMP/Apache through a local
+virtual host:
+
+- ServerName: pingo.local
+- DocumentRoot: C:/Users/Owllabs/Desktop/pingo/public
+- Windows hosts entry: 127.0.0.1 pingo.local
+- Apache PHP runtime: WAMP PHP 8.3.28
+
+Important deployment rule:
+- Apache must point to the Symfony public/ directory.
+- Do not point Apache to C:/Users/Owllabs/Desktop/pingo.
 
 Main application areas:
 - Login page
@@ -20,7 +34,9 @@ Main application areas:
 - Client management page
 - Consultation list page
 - Consultation detail page
-- Reusable sidebar, logo, and icon Twig components
+- Shared dashboard layout and sidebar
+- Shared UI components for icons, panels, tables, forms, buttons, pagination,
+  export actions, modals, page headers, and info pills
 
 2. TECHNOLOGY STACK
 
@@ -47,7 +63,7 @@ Frontend:
 - Symfony UX Turbo
 - Symfony UX Stimulus
 - Lucide icon library
-- CSS split by settings, base, components, and page layouts
+- CSS split into settings, base, components, and page layouts
 
 Development and testing:
 - PHPUnit 9.5 configured
@@ -55,16 +71,61 @@ Development and testing:
 - Symfony MakerBundle enabled in dev
 - Docker Compose service for PostgreSQL
 - Docker Compose override service for Mailpit
+- WAMP/Apache local virtual host for browser testing
+- Composer helper scripts for development asset cleanup, dev cache clearing,
+  and production Asset Mapper compilation
 
-3. HIGH-LEVEL ARCHITECTURE
+3. LOCAL WAMP/APACHE CONFIGURATION
+
+Apache VirtualHost file:
+- C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf
+
+Required virtual host:
+
+<VirtualHost *:80>
+    ServerName pingo.local
+    DocumentRoot "C:/Users/Owllabs/Desktop/pingo/public"
+
+    <Directory "C:/Users/Owllabs/Desktop/pingo/public">
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+        FallbackResource /index.php
+    </Directory>
+
+    ErrorLog "logs/pingo-error.log"
+    CustomLog "logs/pingo-access.log" common
+</VirtualHost>
+
+Windows hosts file:
+- C:\Windows\System32\drivers\etc\hosts
+
+Required entry:
+- 127.0.0.1 pingo.local
+
+Apache modules:
+- rewrite_module is enabled
+- vhost_alias_module is enabled
+
+Apache PHP runtime:
+- PHPIniDir points to C:/wamp64/bin/php/php8.3.28
+- php_module points to C:/wamp64/bin/php/php8.3.28/php8apache2_4.dll
+
+Validation performed:
+- Apache config test: Syntax OK
+- WAMP services checked: wampapache64, wampmysqld64, wampmariadb64 running
+- Browser-facing route checks through http://pingo.local returned HTTP 200
+
+4. HIGH-LEVEL ARCHITECTURE
 
 Request flow:
 
 Browser
+  -> Apache VirtualHost pingo.local
   -> public/index.php
   -> Symfony Runtime
   -> App\Kernel
-  -> Routing from config/routes.yaml
+  -> config/routes.yaml
   -> Attribute routes in src/Controller/*
   -> Controller action
   -> Twig template in templates/pages/*
@@ -81,7 +142,7 @@ Controller layer
 
 View layer
   -> owns most current page content
-  -> contains hardcoded mock CRM data arrays
+  -> contains static/mock CRM data
   -> composes reusable components
 
 Frontend layer
@@ -94,11 +155,15 @@ Database layer
   -> Doctrine configuration exists
   -> PostgreSQL configuration exists
   -> migrations directory exists
-  -> no actual entity, repository, or migration files are committed yet
+  -> no committed entity, repository, or migration classes yet
 
-4. PROJECT DIRECTORY MAP
+5. PROJECT DIRECTORY MAP
 
 Root:
+- README.md
+  Documents the local WAMP/Asset Mapper development rules and the production
+  asset compilation command.
+
 - composer.json
   Defines PHP/Symfony dependencies, autoloading, and Symfony Flex scripts.
 
@@ -110,6 +175,11 @@ Root:
 
 - importmap.php
   Asset Mapper/importmap dependency map.
+
+- bin/dev-clean-assets.php
+  Development utility that moves stale public/assets output into
+  var/compiled-assets-backups so Asset Mapper can serve source assets
+  dynamically again.
 
 - phpunit.xml.dist
   PHPUnit test suite configuration.
@@ -124,10 +194,23 @@ Root:
   Default environment values for APP_ENV, DATABASE_URL, Messenger, and Mailer.
 
 - public/
-  Public web root.
+  Symfony public web root. This is the only directory Apache should expose.
+
+- public/images/logo-pingo.png
+  Application logo asset.
+
+- public/assets/
+  Compiled/generated asset output. This directory is ignored by Git and should
+  be treated as production build output or removable stale development output.
 
 - src/
   Application PHP source code.
+
+- src/AssetMapper/
+  Contains the development-only Asset Mapper compiled-config reader override.
+
+- src/EventSubscriber/
+  Contains console event subscribers, including the dev asset compile guard.
 
 - templates/
   Twig layout, pages, and components.
@@ -147,9 +230,9 @@ Root:
 - vendor/
   Installed Composer dependencies.
 
-5. BACKEND ARCHITECTURE
+6. BACKEND ARCHITECTURE
 
-5.1 Kernel
+6.1 Kernel
 
 File:
 - src/Kernel.php
@@ -158,7 +241,7 @@ The project uses the standard Symfony Kernel with MicroKernelTrait. Application
 configuration is loaded from config/ and bundles are registered through
 config/bundles.php.
 
-5.2 Service container
+6.2 Service container
 
 File:
 - config/services.yaml
@@ -173,35 +256,45 @@ Excluded from automatic service registration:
 - src/Entity/
 - src/Kernel.php
 
-There are currently no custom services defined explicitly.
+Development-only explicit service override:
+- In when@dev, asset_mapper.compiled_asset_mapper_config_reader is replaced by
+  App\AssetMapper\DevCompiledAssetMapperConfigReader.
+- This makes the dev environment ignore compiled public/assets metadata.
 
-5.3 Controllers
+Autoconfigured application services now include:
+- App\EventSubscriber\PreventDevAssetCompileSubscriber
+
+There are still no explicit custom business/application services defined.
+
+6.3 Controllers
 
 Controllers are located in:
 - src/Controller/
 
-Routes are configured by attributes and loaded by:
+Routes are configured by PHP attributes and loaded by:
 - config/routes.yaml
 
 Controller summary:
 
 - SecurityController
   Routes:
-  - GET/ANY /        -> redirects to app_login
-  - GET/ANY /login   -> renders pages/security/login.html.twig
+  - ANY /      -> redirects to app_login
+  - ANY /login -> renders pages/security/login.html.twig
 
 - RdvController
   Routes:
-  - GET/ANY /rdv     -> renders pages/rdv/index.html.twig
+  - ANY /rdv -> renders pages/rdv/index.html.twig
 
 - ClientController
   Routes:
-  - GET/ANY /fiche-clients -> renders pages/clients/index.html.twig
+  - ANY /fiche-clients -> renders pages/clients/index.html.twig
 
 - ConsultationController
   Routes:
-  - GET/ANY /consultation/en-communication
-  - GET/ANY /consultation/details
+  - ANY /consultation/en-communication
+    -> renders pages/consultation/en-communication.html.twig
+  - ANY /consultation/details
+    -> renders pages/consultation/details.html.twig
 
 Current controller behavior:
 - Very thin presentation controllers.
@@ -210,9 +303,9 @@ Current controller behavior:
 - No database access yet.
 - No domain/service orchestration yet.
 
-5.4 Runtime route table
+6.4 Runtime route table
 
-Application routes confirmed by Symfony console:
+Application routes confirmed by Symfony console with WAMP PHP 8.3.28:
 
 - app_home
   Path: /
@@ -240,9 +333,38 @@ Application routes confirmed by Symfony console:
 
 Dev-only profiler/error routes are also available in the dev environment.
 
-6. VIEW AND TEMPLATE ARCHITECTURE
+6.5 Development asset safeguards
 
-6.1 Base layout
+Files:
+- src/AssetMapper/DevCompiledAssetMapperConfigReader.php
+- src/EventSubscriber/PreventDevAssetCompileSubscriber.php
+- bin/dev-clean-assets.php
+- README.md
+
+Purpose:
+- Keep APP_ENV=dev tied to dynamic Asset Mapper source files from assets/.
+- Prevent accidental asset-map:compile execution in APP_ENV=dev.
+- Provide a cleanup path for stale compiled public/assets files.
+- Preserve production compilation through APP_ENV=prod.
+
+Behavior:
+- DevCompiledAssetMapperConfigReader replaces the compiled Asset Mapper config
+  reader in the dev service container only.
+- It reports that compiled config does not exist, returns an empty config, and
+  refuses to save compiled config in development.
+- PreventDevAssetCompileSubscriber listens to console commands and disables
+  asset-map:compile when the Symfony kernel environment is dev.
+- bin/dev-clean-assets.php moves public/assets to
+  var/compiled-assets-backups/assets-YYYYMMDD-HHMMSS when stale compiled files
+  need to be removed from development.
+- README.md documents the development rule:
+  APP_ENV=dev uses dynamic assets from assets/.
+- README.md documents the production rule:
+  APP_ENV=prod uses compiled assets in public/assets/.
+
+7. VIEW AND TEMPLATE ARCHITECTURE
+
+7.1 Base layout
 
 File:
 - templates/base.html.twig
@@ -253,7 +375,7 @@ Responsibilities:
 - Defines title, stylesheets, javascripts, importmap, and body blocks.
 - Loads the importmap entrypoint "app" by default.
 
-6.2 Page templates
+7.2 Page templates
 
 Page templates are stored in:
 - templates/pages/
@@ -261,45 +383,64 @@ Page templates are stored in:
 Pages:
 
 - templates/pages/security/login.html.twig
-  Login UI with email/password fields, remember checkbox, logo, and static form
-  action.
+  Login UI with email/password fields, remember checkbox, and shared brand
+  logo component.
 
 - templates/pages/rdv/index.html.twig
   Rendez-vous dashboard with statistic cards, appointment table, echeance
   table, pagination, search controls, and view toggling.
 
 - templates/pages/clients/index.html.twig
-  Client management page with search form, tabs/date range, client table,
-  pagination, and row actions.
+  Client management page with search form, filters, table, pagination, and row
+  actions.
 
 - templates/pages/consultation/en-communication.html.twig
-  Consultation list page with export buttons, search, table, and pagination.
+  Consultation list page with export buttons, search controls, table, and
+  pagination.
 
 - templates/pages/consultation/details.html.twig
   Consultation detail page with client information, rendez-vous management,
   comments, history modal, and payment mode modal.
 
-6.3 Reusable Twig components
+7.3 Reusable Twig components
 
 Component templates are stored in:
 - templates/components/
 
-Components:
-
-- templates/components/ui/icon.html.twig
-  Generic Lucide icon wrapper. It outputs an element with data-lucide and CSS
-  classes based on size and variant.
-
+Auth components:
 - templates/components/auth/brand-logo.html.twig
-  Shared brand/logo component.
 
+Dashboard components:
+- templates/components/dashboard/layout.html.twig
 - templates/components/dashboard/sidebar.html.twig
-  Main CRM sidebar. It defines navigation items in Twig, highlights the active
-  section, handles submenu markup, and uses the generic icon component.
 
-6.4 Current data ownership
+UI components:
+- templates/components/ui/icon.html.twig
+- templates/components/ui/export-buttons.html.twig
+- templates/components/ui/info-pill.html.twig
+- templates/components/ui/modal.html.twig
+- templates/components/ui/page-header.html.twig
+- templates/components/ui/pagination.html.twig
+- templates/components/ui/panel.html.twig
+- templates/components/ui/table-controls.html.twig
 
-Most displayed CRM data is currently hardcoded directly in Twig arrays:
+Component responsibilities:
+- icon.html.twig wraps Lucide icons through data-lucide attributes.
+- brand-logo.html.twig centralizes the Pin'Go logo markup.
+- dashboard/layout.html.twig provides the shared dashboard shell.
+- sidebar.html.twig defines navigation items, active states, and submenus.
+- page-header.html.twig standardizes page title/action areas.
+- panel.html.twig standardizes framed page panels.
+- table-controls.html.twig standardizes search/filter controls.
+- pagination.html.twig standardizes pagination markup.
+- modal.html.twig standardizes modal overlay/content markup.
+- export-buttons.html.twig standardizes export actions.
+- info-pill.html.twig standardizes compact status/info pills.
+
+7.4 Current data ownership
+
+Most displayed CRM data is currently static or mock data in Twig templates.
+This includes:
 - rendez-vous statistics
 - appointment rows
 - echeance rows
@@ -308,13 +449,13 @@ Most displayed CRM data is currently hardcoded directly in Twig arrays:
 - consultation detail rows
 - payment rows
 
-This means the current view layer is responsible for both layout and mock data.
+This means the current view layer is responsible for both layout and demo data.
 A production version should move this data into controllers, DTOs, services,
 repositories, or view models.
 
-7. FRONTEND ASSET ARCHITECTURE
+8. FRONTEND ASSET ARCHITECTURE
 
-7.1 Asset entrypoint
+8.1 Asset entrypoint
 
 File:
 - assets/app.js
@@ -328,10 +469,12 @@ Responsibilities:
   - sidebar collapse/expand
   - sidebar submenu accessibility state
   - rendez-vous/echeance panel switching
-  - history modal
-  - payment modal
+  - generic modal open/close handling
+  - history modal support
+  - payment modal support
+  - Escape key and overlay-click modal closing
 
-7.2 Stimulus bootstrap
+8.2 Stimulus bootstrap
 
 File:
 - assets/bootstrap.js
@@ -342,7 +485,7 @@ present is the generated example:
 
 The example controller is not part of the current CRM behavior.
 
-7.3 Importmap
+8.3 Importmap
 
 File:
 - importmap.php
@@ -356,7 +499,36 @@ Imported packages:
 - @hotwired/turbo
 - lucide
 
-7.4 CSS organization
+8.4 Development and production asset workflow
+
+Development workflow:
+- Do not run asset-map:compile in APP_ENV=dev.
+- Symfony Asset Mapper should serve JavaScript and CSS dynamically from assets/.
+- If stale public/assets files cause old JavaScript or CSS to be served, run
+  the cleanup utility before clearing the dev cache.
+
+Development helper scripts in composer.json:
+- composer dev:assets:clean
+  Runs php bin/dev-clean-assets.php.
+- composer dev:cache:clear
+  Runs php bin/console cache:clear --env=dev.
+
+Production helper script in composer.json:
+- composer prod:assets:compile
+  Runs php bin/console asset-map:compile --env=prod.
+
+Important runtime caveat:
+- These Composer scripts call php from PATH.
+- On this workstation, PATH currently resolves php to PHP 7.4.33.
+- Until PATH is updated to PHP >= 8.1, run Symfony console commands with
+  C:\wamp64\bin\php\php8.3.28\php.exe or update PATH before using the scripts.
+
+Ignored generated/log files:
+- public/assets/ is ignored as generated Asset Mapper output.
+- assets/vendor/ is ignored as generated importmap/vendor output.
+- server.log and server.err are ignored for local development logs.
+
+8.5 CSS organization
 
 Main stylesheet:
 - assets/styles/app.css
@@ -366,6 +538,14 @@ Import order:
 - base/reset.css
 - components/icon.css
 - components/logo.css
+- components/dashboard-layout.css
+- components/page-header.css
+- components/panel.css
+- components/button.css
+- components/form.css
+- components/table.css
+- components/pagination.css
+- components/modal.css
 - layouts/login.css
 - layouts/rdv.css
 - layouts/clients.css
@@ -380,28 +560,25 @@ CSS responsibilities:
 - assets/styles/base/reset.css
   Base reset styles.
 
-- assets/styles/components/icon.css
-  Icon wrapper sizing and color variants.
-
-- assets/styles/components/logo.css
-  Logo component styles.
+- assets/styles/components/*.css
+  Shared component styling for icons, logo, dashboard layout, page headers,
+  panels, buttons, forms, tables, pagination, and modals.
 
 - assets/styles/layouts/login.css
   Login page layout and form styling.
 
 - assets/styles/layouts/rdv.css
-  Dashboard shell, sidebar, rendez-vous cards, tables, pagination, and panel
-  styles.
+  Rendez-vous dashboard page-specific styling.
 
 - assets/styles/layouts/clients.css
-  Client management page styles.
+  Client management page-specific styling.
 
 - assets/styles/layouts/consultation.css
-  Consultation list/detail pages and modal styles.
+  Consultation list/detail page-specific styling.
 
-8. DATABASE AND PERSISTENCE ARCHITECTURE
+9. DATABASE AND PERSISTENCE ARCHITECTURE
 
-8.1 Doctrine configuration
+9.1 Doctrine configuration
 
 File:
 - config/packages/doctrine.yaml
@@ -414,7 +591,7 @@ Current configuration:
 - Naming strategy is underscore_number_aware.
 - Lazy ghost objects are enabled.
 
-8.2 Migrations
+9.2 Migrations
 
 File:
 - config/packages/doctrine_migrations.yaml
@@ -426,11 +603,11 @@ Current state:
 - migrations/ exists.
 - No migration classes are committed.
 
-8.3 Entities and repositories
+9.3 Entities and repositories
 
 Current state:
-- src/Entity/ exists but contains no entity classes.
-- src/Repository/ exists but contains no repository classes.
+- No entity classes are committed.
+- No repository classes are committed.
 
 Expected future domain entities based on the UI:
 - User or employee/account
@@ -446,7 +623,7 @@ Expected future domain entities based on the UI:
 
 These are inferred from UI names only; no database model is implemented yet.
 
-9. SECURITY ARCHITECTURE
+10. SECURITY ARCHITECTURE
 
 File:
 - config/packages/security.yaml
@@ -454,23 +631,22 @@ File:
 Current state:
 - Symfony SecurityBundle is installed.
 - Password hasher is configured for PasswordAuthenticatedUserInterface.
-- Provider is users_in_memory with no users.
+- Provider is users_in_memory with no configured users.
 - Main firewall is lazy.
 - No login authenticator is configured.
 - No access_control rules are active.
-- Login form in Twig currently posts to "#".
 
 Implication:
-The visible login screen is currently a static UI, not a working authentication
-flow. Production authentication still needs:
+The visible login screen is currently a UI page, not a completed Symfony
+authentication flow. Production authentication still needs:
 - User entity/provider
 - Login form authenticator
-- CSRF protection
+- CSRF protection for the login form
 - Password hashing flow
 - Logout route
 - Access rules for CRM pages
 
-10. MESSAGING, MAIL, AND NOTIFICATIONS
+11. MESSAGING, MAIL, AND NOTIFICATIONS
 
 Messenger:
 - config/packages/messenger.yaml
@@ -490,7 +666,7 @@ Current state:
 - Messaging infrastructure is configured.
 - No custom application messages or handlers are committed yet.
 
-11. DOCKER AND LOCAL SERVICES
+12. DOCKER AND LOCAL SERVICES
 
 Docker Compose database service:
 - PostgreSQL image: postgres:${POSTGRES_VERSION:-16}-alpine
@@ -507,7 +683,71 @@ Docker Compose override:
   - SMTP: 1025
   - UI: 8025
 
-12. TESTING AND QUALITY SETUP
+WAMP local browser runtime:
+- Apache serves the Symfony app at http://pingo.local.
+- The Apache DocumentRoot is public/.
+- WAMP PHP 8.3.28 is used by Apache.
+- WAMP services are running.
+
+13. DEPENDENCY AND CACHE STATUS
+
+Composer install was executed from the project root with WAMP PHP 8.3.28:
+
+C:\wamp64\bin\php\php8.3.28\php.exe C:\composer\composer.phar install
+
+Result:
+- Dependencies were already installed from composer.lock.
+- Composer generated autoload files successfully.
+- Symfony auto-scripts completed:
+  - cache:clear
+  - assets:install public
+  - importmap:install
+
+Symfony cache clear was also executed directly:
+
+C:\wamp64\bin\php\php8.3.28\php.exe bin\console cache:clear
+
+Result:
+- Cache for the dev environment was successfully cleared.
+
+Composer helper scripts now available:
+- composer dev:assets:clean
+- composer dev:cache:clear
+- composer prod:assets:compile
+
+Development Asset Mapper safeguard added:
+- asset-map:compile is blocked in APP_ENV=dev.
+- Compiled public/assets config is ignored in APP_ENV=dev.
+- Stale public/assets output can be moved to var/compiled-assets-backups.
+
+Important PHP note:
+- The default php command on PATH is PHP 7.4.33.
+- This project requires PHP >= 8.1.
+- Use C:\wamp64\bin\php\php8.3.28\php.exe for Symfony/Composer commands
+  unless the system PATH is updated.
+- The new Composer helper scripts that call php require PATH to point to a
+  compatible PHP binary before they are used for Symfony console commands.
+
+14. ROUTE TEST RESULTS
+
+Validated through Apache/WAMP at http://pingo.local:
+
+- http://pingo.local/login
+  Result: 200 OK
+
+- http://pingo.local/rdv
+  Result: 200 OK
+
+- http://pingo.local/fiche-clients
+  Result: 200 OK
+
+- http://pingo.local/consultation/en-communication
+  Result: 200 OK 
+
+- http://pingo.local/consultation/details
+  Result: 200 OK
+
+15. TESTING AND QUALITY SETUP
 
 Testing files:
 - phpunit.xml.dist
@@ -518,22 +758,25 @@ Current state:
 - Symfony PHPUnit bridge is installed.
 - No actual test classes are committed.
 
-Validation performed during this report:
-- Symfony route table checked with PHP 8.3.
-- Symfony about command checked with PHP 8.3.
-- Twig lint passed for all 9 Twig files.
-- YAML lint passed for all 21 YAML files.
-- Container lint passed successfully.
+Validation performed during this report update:
+- Composer install completed with WAMP PHP 8.3.28.
+- Symfony cache clear completed with WAMP PHP 8.3.28.
+- Symfony route table checked with WAMP PHP 8.3.28.
+- Apache VirtualHost verified through live route checks.
+- Apache config test returned Syntax OK when run outside the sandbox.
+- PHP lint passed with WAMP PHP 8.3.28 for:
+  - src/AssetMapper/DevCompiledAssetMapperConfigReader.php
+  - src/EventSubscriber/PreventDevAssetCompileSubscriber.php
+  - bin/dev-clean-assets.php
+- YAML lint passed for config/services.yaml.
 
-Command notes:
-- The default php command on PATH is PHP 7.4.33, which is incompatible with
-  this project because composer.json requires PHP >= 8.1.
-- The WAMP PHP 8.3.28 binary successfully booted Symfony.
-- Doctrine migration status could not be checked because the PHP 8.3 runtime
-  used by the command reported "could not find driver", indicating a missing
-  PDO database driver for the configured database.
+Runtime notes:
+- Default PATH php is PHP 7.4.33 and cannot run this project safely.
+- WAMP PHP 8.3.28 successfully boots Symfony.
+- Xdebug reports that c:/wamp64/logs/xdebug.log could not be opened during
+  console commands. This warning does not block the tested Symfony commands.
 
-13. CURRENT APPLICATION LIMITATIONS
+16. CURRENT APPLICATION LIMITATIONS
 
 Architecture limitations:
 - No domain model is implemented yet.
@@ -541,26 +784,28 @@ Architecture limitations:
 - No repositories are implemented yet.
 - No application services are implemented yet.
 - Controllers do not pass dynamic data to Twig.
-- Twig templates contain mock data arrays.
-- Login is not connected to Symfony authentication.
-- Forms post to placeholder "#".
+- Twig templates contain static/mock data arrays.
+- Login is not connected to Symfony authentication yet.
 - Search, filters, pagination, export, edit, delete, add, payment, and modal
-  actions are UI-only at the moment.
+  actions are mostly UI-only at the moment.
 - Stimulus is installed but not used for the current CRM interactions.
 - A generated example Stimulus controller remains in assets/controllers.
 
 Environment limitations:
-- PATH php is 7.4.33 and cannot run the project.
-- PHP 8.3 is available through WAMP but appears to miss the database PDO driver.
-- Xdebug tries to log to c:/wamp64/logs/xdebug.log, but that file could not be
-  opened during console commands.
+- PATH php is 7.4.33 and should not be used for this Symfony 6.4 app.
+- Symfony/Composer commands should use WAMP PHP 8.3.28.
+- Composer helper scripts that call php will inherit the current PATH PHP until
+  PATH is corrected.
+- Xdebug log path should be fixed or Xdebug disabled for normal development.
 
-14. RECOMMENDED NEXT ARCHITECTURE STEPS
+17. RECOMMENDED NEXT ARCHITECTURE STEPS
 
 1. Fix local runtime alignment
    - Put PHP 8.3 or another PHP >= 8.1 binary first on PATH.
-   - Enable the PostgreSQL PDO driver for that PHP runtime.
+   - Ensure required PDO drivers are enabled for the selected database.
    - Ensure Xdebug log path exists or disable Xdebug for normal development.
+   - After PATH is corrected, use the Composer helper scripts for asset cleanup,
+     dev cache clearing, and production asset compilation.
 
 2. Implement authentication
    - Create User entity.
@@ -573,7 +818,7 @@ Environment limitations:
    - Add entities for Client, RendezVous, Consultation, PaymentMethod,
      Payment, Comment, HistoryEvent, Consultant/Voyant, and Forfait as needed.
    - Generate Doctrine migrations.
-   - Replace hardcoded Twig arrays with database-backed data.
+   - Replace static Twig arrays with database-backed data.
 
 4. Add application services
    - Keep controllers thin.
@@ -597,21 +842,26 @@ Environment limitations:
    - Entity/repository tests for core persistence behavior.
    - Service tests for CRM workflows.
 
-15. FINAL ARCHITECTURE SNAPSHOT
+18. FINAL ARCHITECTURE SNAPSHOT
 
 The project is currently best described as:
 
-Symfony 6.4 CRM UI prototype
+Symfony 6.4 CRM UI application
+  -> WAMP/Apache virtual host at http://pingo.local
+  -> DocumentRoot correctly set to public/
   -> Thin attribute-based controllers
   -> Twig-rendered page templates
-  -> Shared Twig sidebar/icon/logo components
+  -> Shared dashboard and UI components
   -> Asset Mapper/importmap frontend
-  -> Vanilla JS UI behaviors
-  -> CSS design tokens and page layouts
+  -> Dev/prod Asset Mapper workflow separated by service overrides, a console
+     guard, and Composer helper scripts
+  -> Vanilla JavaScript UI behaviors
+  -> CSS design tokens, shared components, and page layouts
   -> Doctrine/PostgreSQL infrastructure prepared
   -> Security/Messenger/Mailer installed but not yet application-integrated
 
 The foundation is clean and recognizable as a standard Symfony application.
-The next major architectural milestone is moving from static Twig mock data to
-a real domain/data layer with authentication, database entities, forms,
-services, and tests.
+The current local browser runtime works through WAMP/Apache. The next major
+architectural milestone is moving from static Twig demo data to a real
+domain/data layer with authentication, database entities, forms, services, and
+tests.

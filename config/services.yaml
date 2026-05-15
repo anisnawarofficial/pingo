@@ -22,3 +22,10 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+when@dev:
+    services:
+        asset_mapper.compiled_asset_mapper_config_reader:
+            class: App\AssetMapper\DevCompiledAssetMapperConfigReader
+            arguments:
+                $projectDir: '%kernel.project_dir%'

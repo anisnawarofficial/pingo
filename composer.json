@@ -77,6 +77,9 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
+        "dev:assets:clean": "php bin/dev-clean-assets.php",
+        "dev:cache:clear": "php bin/console cache:clear --env=dev",
+        "prod:assets:compile": "php bin/console asset-map:compile --env=prod",
         "post-install-cmd": [
             "@auto-scripts"
         ],
