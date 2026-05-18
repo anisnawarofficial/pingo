@@ -2,140 +2,9 @@
 
 {% block title %}Rendez-vous | Pin’Go CRM{% endblock %}
 
-{% set stat_cards = [
-    {
-        view: 'rdv',
-        icon: 'calendar-days',
-        meta: '+15 clients',
-        metaClass: 'is-positive',
-        value: '64',
-        label: 'Rendez-vous du jour'
-    },
-    {
-        view: 'echeances',
-        icon: 'wallet-cards',
-        meta: '6 non réglées',
-        metaClass: 'is-warning',
-        value: '14',
-        label: 'Echéances du jour'
-    },
-    {
-        icon: 'users-round',
-        meta: '0.3%',
-        metaClass: 'is-info',
-        submeta: '-6 aujourd’hui',
-        submetaClass: 'is-warning',
-        value: '14',
-        label: 'Consultations'
-    },
-    {
-        icon: 'euro',
-        meta: '15.3%',
-        metaClass: 'is-info',
-        submeta: '+1k aujourd’hui',
-        submetaClass: 'is-positive',
-        value: '3400',
-        label: 'Chiffre d’affaires'
-    }
-] %}
-
-{% set echeance_rows = [
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        consultant: 'Lorem Opsum',
-        status: '2000€',
-        detailFilled: true,
-        featured: true
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        consultant: 'Lorem Opsum',
-        status: '2000€',
-        detailFilled: false
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        consultant: 'Lorem Opsum',
-        status: '2000€',
-        detailFilled: false
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        consultant: 'Lorem Opsum',
-        status: '2000€',
-        detailFilled: false
-    }
-] %}
-
-{% set appointment_rows = [
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        heure: '15:30:00',
-        history: ['2025/12/10 15:31:00 = création', '2025/12/10 15:30:00 = reporter'],
-        consultant: 'Lorem Opsum',
-        status: 'Reporter',
-        statusClass: 'is-reporter',
-        detail: '525',
-        detailFilled: false
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        heure: '15:30:00',
-        history: ['2025/12/10 15:31:00 = création'],
-        consultant: 'Lorem Opsum',
-        status: 'En cours',
-        statusClass: 'is-progress',
-        detail: '2',
-        detailFilled: true
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        heure: '15:30:00',
-        history: ['2025/12/10 15:31:00 = création', '2025/12/10 15:30:00 = reporter'],
-        consultant: 'Lorem Opsum',
-        status: 'Reporter',
-        statusClass: 'is-reporter',
-        detail: '525',
-        detailFilled: false
-    },
-    {
-        client: 'Lorem Opsum Dolor',
-        tel: '04 33 22 11 33',
-        voyant: 'Lorem Opsum',
-        heure: '15:30:00',
-        history: ['2025/12/10 15:31:00 = création', '2025/12/10 15:30:00 = reporter'],
-        consultant: 'Lorem Opsum',
-        status: 'Reporter',
-        statusClass: 'is-reporter',
-        detail: '525',
-        detailFilled: false
-    }
-] %}
-
-{% block body %}
-{% embed 'components/dashboard/layout.html.twig' with {
-    page_classes: 'rdv-page',
-    main_classes: 'rdv-main',
-    content_classes: 'dashboard-content--rdv',
-    active_label: 'Consultation'
-} %}
-    {% block content %}
+{% block main_content %}
         <section class="rdv-stats" aria-label="Indicateurs du jour">
-            {% for card in stat_cards %}
+            {% for card in page.statCards %}
                 {% set card_tag = card.view|default(false) ? 'button' : 'article' %}
                 <{{ card_tag }}
                     class="rdv-stat-card{% if card.view|default(null) == 'rdv' %} is-active{% endif %}"
@@ -180,9 +49,10 @@
                 extra_classes: 'rdv-panel__controls',
                 limit_classes: 'rdv-show-count',
                 search_classes: 'rdv-search',
-                per_page: 5,
-                search_placeholder: 'Rechercher...',
-                search_aria_label: 'Rechercher un rendez-vous'
+                per_page: page.tableControls.rendezVous.perPage,
+                per_page_options: page.tableControls.rendezVous.perPageOptions,
+                search_placeholder: page.tableControls.rendezVous.searchPlaceholder,
+                search_aria_label: page.tableControls.rendezVous.searchAriaLabel
             } only %}
 
             <div class="rdv-table crm-table crm-table-scroll" role="table" aria-label="Liste des rendez-vous" style="--table-columns: 1.25fr 1fr 1.05fr 0.72fr 1.78fr 1.05fr 0.8fr 0.68fr;">
@@ -198,7 +68,7 @@
                 </div>
 
                 <div class="rdv-table__body crm-table__body">
-                    {% for row in appointment_rows %}
+                    {% for row in page.rendezVous %}
                         <article class="rdv-table__row crm-table__row" role="row">
                             <span class="crm-table__cell" role="cell" data-label="Client">{{ row.client }}</span>
                             <span class="crm-table__cell" role="cell" data-label="Tel">{{ row.tel }}</span>
@@ -229,7 +99,14 @@
                 </div>
             </div>
 
-            {% include 'components/ui/pagination.html.twig' only %}
+            {% include 'components/ui/pagination.html.twig' with {
+                summary_text: page.pagination.summary,
+                current_page: page.pagination.currentPage,
+                total_pages: page.pagination.totalPages,
+                pages: page.pagination.pages,
+                show_ellipsis: page.pagination.showEllipsis,
+                show_all_label: page.pagination.showAllLabel
+            } only %}
                 </div>
 
                 <div class="rdv-panel__view" id="rdv-panel-echeances" data-rdv-panel-view="echeances" aria-labelledby="echeances-list-title" aria-hidden="true" inert>
@@ -244,10 +121,10 @@
                         extra_classes: 'rdv-panel__controls',
                         limit_classes: 'rdv-show-count',
                         search_classes: 'rdv-search',
-                        per_page: 4,
-                        per_page_options: [4, 10, 25],
-                        search_placeholder: 'Rechercher...',
-                        search_aria_label: 'Rechercher une échéance'
+                        per_page: page.tableControls.echeances.perPage,
+                        per_page_options: page.tableControls.echeances.perPageOptions,
+                        search_placeholder: page.tableControls.echeances.searchPlaceholder,
+                        search_aria_label: page.tableControls.echeances.searchAriaLabel
                     } only %}
 
                     <div class="rdv-table rdv-table--echeances crm-table crm-table-scroll" role="table" aria-label="Liste des Echéances" style="--table-columns: 1.35fr 1fr 1fr 1fr 0.72fr 0.58fr;">
@@ -261,7 +138,7 @@
                         </div>
 
                         <div class="rdv-table__body crm-table__body">
-                            {% for row in echeance_rows %}
+                            {% for row in page.echeances %}
                                 <article class="rdv-table__row crm-table__row{% if row.featured|default(false) %} is-featured crm-table__row--active{% endif %}" role="row">
                                     <span class="crm-table__cell" role="cell" data-label="Client">{{ row.client }}</span>
                                     <span class="crm-table__cell" role="cell" data-label="Tel">{{ row.tel }}</span>
@@ -282,11 +159,16 @@
                         </div>
                     </div>
 
-                    {% include 'components/ui/pagination.html.twig' only %}
+                    {% include 'components/ui/pagination.html.twig' with {
+                        summary_text: page.pagination.summary,
+                        current_page: page.pagination.currentPage,
+                        total_pages: page.pagination.totalPages,
+                        pages: page.pagination.pages,
+                        show_ellipsis: page.pagination.showEllipsis,
+                        show_all_label: page.pagination.showAllLabel
+                    } only %}
                 </div>
             </div>
             {% endblock %}
         {% endembed %}
-    {% endblock %}
-{% endembed %}
 {% endblock %}

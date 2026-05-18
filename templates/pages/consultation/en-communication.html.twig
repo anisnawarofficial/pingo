@@ -2,74 +2,7 @@
 
 {% block title %}Consultation En communication | Pin’Go CRM{% endblock %}
 
-{% set consultation_rows = [
-    {
-        id: '525',
-        startedAt: '11/12 11:39:35',
-        since: '02h54m',
-        client: 'Lore Opsum',
-        birthDate: '08/10/1993',
-        tel: '00 00 00 00 00',
-        voyant: 'Lorem',
-        consultant: 'Lorem',
-        filled: false
-    },
-    {
-        id: '9',
-        startedAt: '11/12 11:39:35',
-        since: '02h54m',
-        client: 'Lore Opsum',
-        birthDate: '08/10/1993',
-        tel: '00 00 00 00 00',
-        voyant: 'Lorem',
-        consultant: 'Lorem',
-        filled: true,
-        featured: true
-    },
-    {
-        id: '32',
-        startedAt: '11/12 11:39:35',
-        since: '02h54m',
-        client: 'Lore Opsum',
-        birthDate: '08/10/1993',
-        tel: '00 00 00 00 00',
-        voyant: 'Lorem',
-        consultant: 'Lorem',
-        filled: false
-    },
-    {
-        id: '25',
-        startedAt: '11/12 11:39:35',
-        since: '02h54m',
-        client: 'Lore Opsum',
-        birthDate: '08/10/1993',
-        tel: '00 00 00 00 00',
-        voyant: 'Lorem',
-        consultant: 'Lorem',
-        filled: false
-    },
-    {
-        id: '423',
-        startedAt: '11/12 11:39:35',
-        since: '02h54m',
-        client: 'Lore Opsum',
-        birthDate: '08/10/1993',
-        tel: '00 00 00 00 00',
-        voyant: 'Lorem',
-        consultant: 'Lorem',
-        filled: false
-    }
-] %}
-
-{% block body %}
-{% embed 'components/dashboard/layout.html.twig' with {
-    page_classes: 'rdv-page consultation-list-page',
-    main_classes: 'consultation-list-main',
-    content_classes: 'dashboard-content--consultation-list',
-    active_label: 'Consultation',
-    active_submenu: 'En Communication'
-} %}
-    {% block content %}
+{% block main_content %}
         {% include 'components/ui/page-header.html.twig' with {
             icon: 'headphones',
             title: 'Gestion des Consultations',
@@ -97,11 +30,11 @@
                     select_wrapper_classes: 'consultation-list-select',
                     select_icon_classes: 'consultation-list-select__icon',
                     search_classes: 'rdv-search consultation-list-search',
-                    per_page: 6,
-                    per_page_options: [6, 10, 25],
+                    per_page: page.tableControls.perPage,
+                    per_page_options: page.tableControls.perPageOptions,
                     show_select_arrows: true,
-                    search_placeholder: 'Rechercher...',
-                    search_aria_label: 'Rechercher une consultation'
+                    search_placeholder: page.tableControls.searchPlaceholder,
+                    search_aria_label: page.tableControls.searchAriaLabel
                 } only %}
 
                 {% include 'components/ui/export-buttons.html.twig' only %}
@@ -121,7 +54,7 @@
                 </div>
 
                 <div class="consultation-communication-table__body crm-table__body">
-                    {% for row in consultation_rows %}
+                    {% for row in page.rows %}
                         <article class="consultation-communication-table__row crm-table__row{% if row.featured|default(false) %} is-featured crm-table__row--active{% endif %}" role="row">
                             <span class="crm-table__cell" role="cell" data-label="#">{{ row.id }}</span>
                             <span class="crm-table__cell" role="cell" data-label="Commencer">{{ row.startedAt }}</span>
@@ -146,10 +79,14 @@
             </div>
 
             {% include 'components/ui/pagination.html.twig' with {
-                extra_classes: 'rdv-panel__footer consultation-list-footer'
+                extra_classes: 'rdv-panel__footer consultation-list-footer',
+                summary_text: page.pagination.summary,
+                current_page: page.pagination.currentPage,
+                total_pages: page.pagination.totalPages,
+                pages: page.pagination.pages,
+                show_ellipsis: page.pagination.showEllipsis,
+                show_all_label: page.pagination.showAllLabel
             } only %}
             {% endblock %}
         {% endembed %}
-    {% endblock %}
-{% endembed %}
 {% endblock %}

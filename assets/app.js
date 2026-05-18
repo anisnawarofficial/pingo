@@ -79,7 +79,7 @@ const icons = {
     X
 };
 
-const renderIcons = () => {
+const initIcons = () => {
     createIcons({
         icons,
         attrs: {
@@ -90,10 +90,10 @@ const renderIcons = () => {
     });
 };
 
-const syncRdvSubmenuAccessibility = (page) => {
-    const isCollapsed = page.classList.contains('rdv-page--sidebar-collapsed');
+const syncSidebarSubmenuAccessibility = (shell) => {
+    const isCollapsed = shell.classList.contains('rdv-page--sidebar-collapsed');
 
-    page.querySelectorAll('[data-sidebar-submenu]').forEach((group) => {
+    shell.querySelectorAll('[data-sidebar-submenu]').forEach((group) => {
         const submenu = group.querySelector('.rdv-nav__submenu');
         const isOpen = group.classList.contains('is-open');
         const shouldHideLinks = isCollapsed || !isOpen;
@@ -113,28 +113,41 @@ const syncRdvSubmenuAccessibility = (page) => {
     });
 };
 
-const initRdvSidebar = () => {
-    const page = document.querySelector('[data-rdv-page]');
-    const toggle = document.querySelector('[data-sidebar-toggle]');
+const initDisabledLinks = (root = document) => {
+    root.querySelectorAll('[data-disabled-link]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+        });
+    });
+};
 
-    if (!page || !toggle) {
+const initSidebar = () => {
+    const shell = document.querySelector('[data-dashboard-shell]');
+
+    if (!shell) {
         return;
     }
 
-    toggle.addEventListener('click', () => {
-        const isCollapsed = page.classList.toggle('rdv-page--sidebar-collapsed');
+    const toggle = shell.querySelector('[data-sidebar-toggle]');
 
-        syncRdvSubmenuAccessibility(page);
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const isCollapsed = shell.classList.toggle('rdv-page--sidebar-collapsed');
 
-        toggle.setAttribute('aria-expanded', String(!isCollapsed));
-        toggle.setAttribute(
-            'aria-label',
-            isCollapsed ? 'Ouvrir le menu' : 'Réduire le menu'
-        );
-    });
+            syncSidebarSubmenuAccessibility(shell);
 
-    page.querySelectorAll('[data-sidebar-submenu-toggle]').forEach((submenuToggle) => {
-        submenuToggle.addEventListener('click', () => {
+            toggle.setAttribute('aria-expanded', String(!isCollapsed));
+            toggle.setAttribute(
+                'aria-label',
+                isCollapsed ? 'Ouvrir le menu' : 'Réduire le menu'
+            );
+        });
+    }
+
+    shell.querySelectorAll('[data-sidebar-submenu-toggle]').forEach((submenuToggle) => {
+        submenuToggle.addEventListener('click', (event) => {
+            event.preventDefault();
+
             const group = submenuToggle.closest('[data-sidebar-submenu]');
 
             if (!group) {
@@ -142,15 +155,16 @@ const initRdvSidebar = () => {
             }
 
             const isOpen = group.classList.toggle('is-open');
-            submenuToggle.setAttribute('aria-expanded', String(isOpen));
-            syncRdvSubmenuAccessibility(page);
+            submenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            syncSidebarSubmenuAccessibility(shell);
         });
     });
 
-    syncRdvSubmenuAccessibility(page);
+    initDisabledLinks(shell);
+    syncSidebarSubmenuAccessibility(shell);
 };
 
-const initRdvPanelToggle = () => {
+const initRdvToggle = () => {
     const page = document.querySelector('[data-rdv-page]');
 
     if (!page) {
@@ -282,9 +296,9 @@ const initModals = () => {
 };
 
 const boot = () => {
-    renderIcons();
-    initRdvSidebar();
-    initRdvPanelToggle();
+    initIcons();
+    initSidebar();
+    initRdvToggle();
     initModals();
 };
 

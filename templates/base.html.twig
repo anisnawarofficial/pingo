@@ -14,7 +14,40 @@
         {% endblock %}
     </head>
 
+    {% set layout_type = layout_type|default('dashboard') %}
+
     <body>
-        {% block body %}{% endblock %}
+        {% if layout_type == 'auth' %}
+            {% block auth_content %}{% endblock %}
+        {% else %}
+            {% set shell_classes = ['dashboard-shell'] %}
+            {% if page_classes|default(false) %}
+                {% set shell_classes = shell_classes|merge(page_classes|split(' ')) %}
+            {% endif %}
+
+            {% set main_classes_list = ['dashboard-main'] %}
+            {% if main_classes|default(false) %}
+                {% set main_classes_list = main_classes_list|merge(main_classes|split(' ')) %}
+            {% endif %}
+
+            {% set content_classes_list = ['dashboard-content'] %}
+            {% if content_classes|default(false) %}
+                {% set content_classes_list = content_classes_list|merge(content_classes|split(' ')) %}
+            {% endif %}
+
+            <div class="{{ shell_classes|join(' ') }}" data-dashboard-shell {{ page_attrs|default('')|raw }}>
+                {% include 'components/dashboard/sidebar.html.twig' with {
+                    active_route: active_route|default(app.request.attributes.get('_route')),
+                    active_label: active_label|default(null),
+                    active_submenu: active_submenu|default(null)
+                } only %}
+
+                <main class="{{ main_classes_list|join(' ') }}">
+                    <div class="{{ content_classes_list|join(' ') }}">
+                        {% block main_content %}{% endblock %}
+                    </div>
+                </main>
+            </div>
+        {% endif %}
     </body>
 </html>

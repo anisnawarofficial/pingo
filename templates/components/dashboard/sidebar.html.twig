@@ -1,27 +1,55 @@
-{% set active_label = active_label|default('Consultation') %}
+{% set active_route = active_route|default(null) %}
+{% set active_label = active_label|default(null) %}
 {% set active_submenu = active_submenu|default(null) %}
+{% set is_consultation_active =
+    active_label|default(null) == 'Consultation'
+    or active_route|default('') starts with 'app_consultation_'
+    or active_submenu|default(null) is not null
+%}
 
-{% set navigation_items = [
-    { label: 'Accueil', icon: 'house', href: '#' },
+{% set primary_navigation = [
+    { label: 'Accueil', route: 'app_rdv', icon: 'house', href: path('app_rdv') },
     { label: 'CallBack', icon: 'phone-call', href: '#', badge: '2' },
-    { label: 'Fiche clients', icon: 'contact-round', href: path('app_clients') },
+    { label: 'Fiche clients', route: 'app_clients', icon: 'contact-round', href: path('app_clients') }
+] %}
+
+{% set consultation_submenu = [
     {
-        label: 'Consultation',
-        icon: 'stethoscope',
-        href: path('app_rdv'),
-        dropdown: true,
-        open: active_label == 'Consultation',
-        submenu: [
-            { label: 'En Communication', href: path('app_consultation_en_communication') },
-            { label: 'En attente de Rdv', href: path('app_rdv') },
-            { label: 'Avec Rdv', href: path('app_rdv') },
-            { label: 'En attente de Paiement', href: '#' },
-            { label: 'Forfait en cours', href: '#' }
-        ]
+        label: 'En Communication',
+        href: path('app_consultation_en_communication'),
+        route: 'app_consultation_en_communication'
     },
+    {
+        label: 'En attente de Rdv',
+        href: '#',
+        disabled: true
+    },
+    {
+        label: 'Avec Rdv',
+        href: '#',
+        disabled: true
+    },
+    {
+        label: 'En attente de Paiement',
+        href: '#',
+        disabled: true
+    },
+    {
+        label: 'Forfait en cours',
+        href: '#',
+        disabled: true
+    },
+    {
+        label: 'Détails de consultation',
+        href: path('app_consultation_details'),
+        route: 'app_consultation_details'
+    }
+] %}
+
+{% set secondary_navigation = [
     { label: 'Statistiques', icon: 'chart-column', href: '#' },
-    { label: 'Configuration', icon: 'settings', href: '#', dropdown: true },
-    { label: 'Déconnexion', icon: 'log-out', href: '#' }
+    { label: 'Configuration', icon: 'settings', href: '#' },
+    { label: 'Déconnexion', icon: 'log-out', href: path('app_login') }
 ] %}
 
 <aside class="rdv-sidebar" aria-label="Navigation principale">
@@ -41,56 +69,77 @@
     </div>
 
     <nav class="rdv-nav" aria-label="Menu CRM">
-        {% for item in navigation_items %}
-            {% set is_active = item.label == active_label %}
-            {% set has_submenu = item.submenu|default([])|length > 0 %}
-            {% if has_submenu %}
-                {% set submenu_id = 'rdv-submenu-' ~ loop.index %}
-                <div class="rdv-nav__group{% if item.open|default(false) %} is-open{% endif %}" data-sidebar-submenu>
-                    <button
-                        class="rdv-nav__item rdv-nav__item--button{% if is_active %} is-active{% endif %}"
-                        type="button"
-                        data-sidebar-submenu-toggle
-                        aria-expanded="{{ item.open|default(false) ? 'true' : 'false' }}"
-                        aria-controls="{{ submenu_id }}"
-                    >
+        <ul class="rdv-nav__list">
+            {% for item in primary_navigation %}
+                {% set route_match = item.route|default(null) and active_route == item.route %}
+                {% set label_match = active_label is not null and item.label == active_label %}
+                {% set is_active = route_match or (active_route is empty and label_match) %}
+
+                <li class="rdv-nav__item{% if is_active %} is-active{% endif %}">
+                    <a class="rdv-nav__link{% if is_active %} is-active{% endif %}" href="{{ item.href }}" {% if is_active %}aria-current="page"{% endif %}>
                         <span class="rdv-nav__icon">
                             {% include 'components/ui/icon.html.twig' with { name: item.icon, size: 'lg' } only %}
                         </span>
                         <span class="rdv-nav__label">{{ item.label }}</span>
-                        <span class="rdv-nav__chevron">
-                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'sm' } only %}
-                        </span>
-                    </button>
+                        {% if item.badge|default(false) %}
+                            <span class="rdv-nav__badge">{{ item.badge }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
 
-                    <div class="rdv-nav__submenu" id="{{ submenu_id }}">
-                        <div class="rdv-nav__submenu-inner">
-                            {% for submenu_item in item.submenu %}
-                                {% set is_submenu_active = submenu_item.label == active_submenu %}
-                                <a class="rdv-nav__submenu-link{% if is_submenu_active %} is-active{% endif %}" href="{{ submenu_item.href }}" {% if is_submenu_active %}aria-current="page"{% endif %}>
-                                    <span>{{ submenu_item.label }}</span>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <a class="rdv-nav__item{% if is_active %} is-active{% endif %}" href="{{ item.href }}">
+            <li class="rdv-nav__item{% if is_consultation_active %} is-active is-open{% endif %}" data-sidebar-submenu>
+                <button
+                    type="button"
+                    class="rdv-nav__link rdv-nav__link--submenu {{ is_consultation_active ? 'is-active' : '' }}"
+                    data-sidebar-submenu-toggle
+                    aria-expanded="{{ is_consultation_active ? 'true' : 'false' }}"
+                    aria-controls="rdv-submenu-consultation"
+                >
                     <span class="rdv-nav__icon">
-                        {% include 'components/ui/icon.html.twig' with { name: item.icon, size: 'lg' } only %}
+                        {% include 'components/ui/icon.html.twig' with { name: 'stethoscope', size: 'lg' } only %}
                     </span>
-                    <span class="rdv-nav__label">{{ item.label }}</span>
-                    {% if item.badge|default(false) %}
-                        <span class="rdv-nav__badge">{{ item.badge }}</span>
-                    {% endif %}
-                    {% if item.dropdown|default(false) %}
-                        <span class="rdv-nav__chevron">
-                            {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'sm' } only %}
+                    <span class="rdv-nav__label">Consultation</span>
+                    <span class="rdv-nav__chevron">
+                        {% include 'components/ui/icon.html.twig' with { name: 'chevron-down', size: 'sm' } only %}
+                    </span>
+                </button>
+
+                <ul class="rdv-nav__submenu" id="rdv-submenu-consultation">
+                    {% for submenu_item in consultation_submenu %}
+                        {% set submenu_route_match = submenu_item.route|default(null) and active_route == submenu_item.route %}
+                        {% set submenu_label_match = active_submenu is not null and submenu_item.label == active_submenu %}
+                        {% set is_submenu_active = submenu_route_match or submenu_label_match %}
+
+                        <li class="rdv-nav__submenu-item{% if is_submenu_active %} is-active{% endif %}">
+                            <a
+                                href="{{ submenu_item.href }}"
+                                class="rdv-nav__submenu-link{% if submenu_item.disabled|default(false) %} is-disabled{% endif %}{% if is_submenu_active %} is-active{% endif %}"
+                                {% if submenu_item.disabled|default(false) %}aria-disabled="true" data-disabled-link{% endif %}
+                                {% if is_submenu_active %}aria-current="page"{% endif %}
+                            >
+                                <span>{{ submenu_item.label }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+
+            {% for item in secondary_navigation %}
+                {% set route_match = item.route|default(null) and active_route == item.route %}
+                {% set label_match = active_label is not null and item.label == active_label %}
+                {% set is_active = route_match or (active_route is empty and label_match) %}
+
+                <li class="rdv-nav__item{% if is_active %} is-active{% endif %}">
+                    <a class="rdv-nav__link{% if is_active %} is-active{% endif %}" href="{{ item.href }}" {% if is_active %}aria-current="page"{% endif %}>
+                        <span class="rdv-nav__icon">
+                            {% include 'components/ui/icon.html.twig' with { name: item.icon, size: 'lg' } only %}
                         </span>
-                    {% endif %}
-                </a>
-            {% endif %}
-        {% endfor %}
+                        <span class="rdv-nav__label">{{ item.label }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </nav>
 
     <div class="rdv-profile">

@@ -3,10 +3,10 @@
 {% set pages = pages|default([1, 2, 3]) %}
 
 <footer class="crm-pagination {{ extra_classes|default('rdv-panel__footer') }}">
-    <p class="crm-pagination__summary">{{ summary_text|default('Affichage de lâ€™Ã©lÃ©ment # Ã  # sur 12 Ã©lÃ©ments') }}</p>
+    <p class="crm-pagination__summary">{{ summary_text|default('Affichage de l’élément # à # sur 12 éléments') }}</p>
 
     <nav class="crm-pagination__pages {{ pages_classes|default('rdv-pagination') }}" aria-label="{{ aria_label|default('Pagination') }}">
-        <a class="crm-pagination__page" href="{{ previous_href|default('#') }}" aria-label="{{ previous_label|default('Page prÃ©cÃ©dente') }}">
+        <a class="crm-pagination__page" href="{{ previous_href|default('#') }}" aria-label="{{ previous_label|default('Page précédente') }}">
             {% include 'components/ui/icon.html.twig' with { name: 'chevron-left', size: 'sm' } only %}
         </a>
         {% for page in pages %}

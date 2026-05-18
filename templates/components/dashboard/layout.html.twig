@@ -1,3 +1,4 @@
+{# Legacy dashboard wrapper. The active dashboard shell now lives in base.html.twig. Keep temporarily for backward compatibility. #}
 {% set shell_classes = ['dashboard-shell'] %}
 {% if page_classes|default(false) %}
     {% set shell_classes = shell_classes|merge([page_classes]) %}
@@ -13,7 +14,7 @@
     {% set content_classes_list = content_classes_list|merge([content_classes]) %}
 {% endif %}
 
-<div class="{{ shell_classes|join(' ') }}" data-rdv-page>
+<div class="{{ shell_classes|join(' ') }}">
     {% include 'components/dashboard/sidebar.html.twig' with {
         active_label: active_label|default('Consultation'),
         active_submenu: active_submenu|default(null)

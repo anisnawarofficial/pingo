@@ -1,0 +1,25 @@
+{% set state_action_tag = action_href|default(false) ? 'a' : 'button' %}
+
+<section class="crm-empty-state {{ extra_classes|default('') }}">
+    {% if icon|default(false) %}
+        <span class="crm-empty-state__icon">
+            {% include 'components/ui/icon.html.twig' with { name: icon, size: 'lg', variant: 'primary' } only %}
+        </span>
+    {% endif %}
+
+    <h2 class="crm-empty-state__title">{{ title }}</h2>
+    <p class="crm-empty-state__text">{{ text }}</p>
+
+    {% if action_label|default(false) %}
+        <{{ state_action_tag }}
+            class="btn btn-outline-purple"
+            {% if state_action_tag == 'a' %}
+                href="{{ action_href }}"
+            {% else %}
+                type="button"
+            {% endif %}
+        >
+            {{ action_label }}
+        </{{ state_action_tag }}>
+    {% endif %}
+</section>

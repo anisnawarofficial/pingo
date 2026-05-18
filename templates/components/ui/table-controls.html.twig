@@ -7,7 +7,7 @@
     <label class="table-controls__limit {{ limit_classes }}">
         <span>{{ limit_label|default('Afficher') }}</span>
         <span class="crm-select {{ select_wrapper_classes }}">
-            <select class="{{ select_classes }}" aria-label="{{ select_aria_label|default('Nombre dâ€™Ã©lÃ©ments affichÃ©s') }}">
+            <select class="{{ select_classes }}" aria-label="{{ select_aria_label|default('Nombre d’éléments affichés') }}">
                 {% for option in per_page_options|default([per_page|default(5), 10, 25]) %}
                     <option{% if option == per_page|default(5) %} selected{% endif %}>{{ option }}</option>
                 {% endfor %}
@@ -19,7 +19,7 @@
                 </span>
             {% endif %}
         </span>
-        <span>{{ elements_label|default('Ã©lÃ©ments') }}</span>
+        <span>{{ elements_label|default('éléments') }}</span>
     </label>
 
     <label class="table-controls__search crm-search {{ search_classes }}">

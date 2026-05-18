@@ -1,7 +1,8 @@
 TECHNICAL REPORT - PIN'GO CRM PROJECT ARCHITECTURE
-Updated on: 2026-05-15
+Updated on: 2026-05-18
 Workspace: C:\Users\Owllabs\Desktop\pingo
 Local URL: http://pingo.local
+Also validated at: http://127.0.0.1:8000
 
 1. EXECUTIVE SUMMARY
 
@@ -10,11 +11,13 @@ Twig-rendered CRM interface. The application uses thin Symfony controllers,
 reusable Twig components, Symfony Asset Mapper/importmap, vanilla JavaScript,
 and a modular CSS architecture.
 
-The latest update adds development safeguards around Symfony Asset Mapper so
-local WAMP development uses dynamic assets from assets/ instead of stale
-compiled output in public/assets/. It also adds Composer helper scripts,
-documentation, and a cleanup utility for separating development and production
-asset workflows.
+The latest update keeps the earlier Asset Mapper development safeguards and
+also completes the shared dashboard-shell migration into base.html.twig. The
+sidebar now works consistently across /rdv, /fiche-clients,
+/consultation/en-communication, and /consultation/details, with correct active
+states, a non-navigating Consultation parent toggle, a visible link for
+consultation details, and safe disabled placeholders for submenu routes that do
+not exist yet.
 
 The project is configured to run correctly under WAMP/Apache through a local
 virtual host:
@@ -37,6 +40,21 @@ Main application areas:
 - Shared dashboard layout and sidebar
 - Shared UI components for icons, panels, tables, forms, buttons, pagination,
   export actions, modals, page headers, and info pills
+
+Current frontend status in simple terms:
+- Symfony/Twig frontend
+- base layout centralized in base.html.twig
+- reusable components in templates/components/
+- thin controllers and page templates focused on presentation
+- mock data still mainly stored in Twig templates, not yet moved to services
+- CSS tokenized through shared variables and component/layout stylesheets
+- main UI states covered for sidebar, submenu, pagination, panel toggles, and
+  modals
+- accessibility partly handled through aria labels, aria-expanded,
+  aria-current, dialog hooks, and keyboard Escape support for modals
+- dev workflow stable with Asset Mapper safeguards and WAMP PHP 8.3.28
+- browser-facing routes and rendered HTML tested; full manual browser click
+  validation remains a separate final QA step
 
 2. TECHNOLOGY STACK
 
@@ -133,6 +151,45 @@ Browser
   -> reusable Twig components
   -> Asset Mapper importmap entrypoint assets/app.js
   -> CSS and JavaScript behavior in assets/
+
+Simple route-to-screen traffic:
+
+- /login
+  Browser -> SecurityController::login()
+  -> templates/pages/security/login.html.twig
+  -> templates/base.html.twig in auth mode
+  -> login-only HTML without dashboard sidebar
+  -> icons and styles loaded by the shared frontend entrypoint
+
+- /rdv
+  Browser -> RdvController::index()
+  -> templates/pages/rdv/index.html.twig
+  -> templates/base.html.twig in dashboard mode
+  -> templates/components/dashboard/sidebar.html.twig
+  -> RDV dashboard content in block main_content
+  -> RDV/Echeances JavaScript enabled through page_attrs=data-rdv-page
+
+- /fiche-clients
+  Browser -> ClientController::index()
+  -> templates/pages/clients/index.html.twig
+  -> templates/base.html.twig in dashboard mode
+  -> templates/components/dashboard/sidebar.html.twig
+  -> clients page content in block main_content
+
+- /consultation/en-communication
+  Browser -> ConsultationController::enCommunication()
+  -> templates/pages/consultation/en-communication.html.twig
+  -> templates/base.html.twig in dashboard mode
+  -> templates/components/dashboard/sidebar.html.twig
+  -> consultation list content in block main_content
+
+- /consultation/details
+  Browser -> ConsultationController::details()
+  -> templates/pages/consultation/details.html.twig
+  -> templates/base.html.twig in dashboard mode
+  -> templates/components/dashboard/sidebar.html.twig
+  -> consultation detail content in block main_content
+  -> history and payment modals mounted inside the same page template
 
 Current dependency direction:
 
@@ -298,6 +355,9 @@ Controller summary:
 
 Current controller behavior:
 - Very thin presentation controllers.
+- Controllers now pass page/layout state such as active_route, active_label,
+  active_submenu, page_classes, main_classes, content_classes, and layout_type
+  where needed.
 - No request validation yet.
 - No form handling yet.
 - No database access yet.
@@ -372,8 +432,13 @@ File:
 Responsibilities:
 - Defines the HTML document structure.
 - Sets lang="fr".
-- Defines title, stylesheets, javascripts, importmap, and body blocks.
+- Defines title, stylesheets, javascripts, importmap, main_content, and
+  auth_content blocks.
 - Loads the importmap entrypoint "app" by default.
+- Switches between auth and dashboard layouts through layout_type.
+- Builds the shared dashboard shell directly in base.html.twig.
+- Injects the shared sidebar once for all dashboard pages.
+- Exposes the shared data-dashboard-shell hook used by sidebar JavaScript.
 
 7.2 Page templates
 
@@ -384,23 +449,47 @@ Pages:
 
 - templates/pages/security/login.html.twig
   Login UI with email/password fields, remember checkbox, and shared brand
-  logo component.
+  logo area.
+  Render path:
+  SecurityController -> login.html.twig -> base.html.twig(auth mode)
+  Main role:
+  Public entry page. No sidebar.
 
 - templates/pages/rdv/index.html.twig
   Rendez-vous dashboard with statistic cards, appointment table, echeance
   table, pagination, search controls, and view toggling.
+  Render path:
+  RdvController -> rdv/index.html.twig -> base.html.twig(dashboard mode)
+  Main role:
+  Dashboard landing page. This is the only page that passes data-rdv-page.
 
 - templates/pages/clients/index.html.twig
   Client management page with search form, filters, table, pagination, and row
   actions.
+  Render path:
+  ClientController -> clients/index.html.twig -> base.html.twig(dashboard mode)
+  Main role:
+  Client search and listing screen.
 
 - templates/pages/consultation/en-communication.html.twig
   Consultation list page with export buttons, search controls, table, and
   pagination.
+  Render path:
+  ConsultationController::enCommunication()
+  -> consultation/en-communication.html.twig
+  -> base.html.twig(dashboard mode)
+  Main role:
+  List screen for consultations currently in communication.
 
 - templates/pages/consultation/details.html.twig
   Consultation detail page with client information, rendez-vous management,
   comments, history modal, and payment mode modal.
+  Render path:
+  ConsultationController::details()
+  -> consultation/details.html.twig
+  -> base.html.twig(dashboard mode)
+  Main role:
+  Detail screen with modal-based secondary views.
 
 7.3 Reusable Twig components
 
@@ -427,8 +516,11 @@ UI components:
 Component responsibilities:
 - icon.html.twig wraps Lucide icons through data-lucide attributes.
 - brand-logo.html.twig centralizes the Pin'Go logo markup.
-- dashboard/layout.html.twig provides the shared dashboard shell.
-- sidebar.html.twig defines navigation items, active states, and submenus.
+- dashboard/layout.html.twig is a legacy/alternate dashboard wrapper; the main
+  shared shell now lives in base.html.twig.
+- sidebar.html.twig defines navigation items, active states, real consultation
+  submenu routes, disabled submenu placeholders, and the Consultation dropdown
+  toggle behavior.
 - page-header.html.twig standardizes page title/action areas.
 - panel.html.twig standardizes framed page panels.
 - table-controls.html.twig standardizes search/filter controls.
@@ -437,7 +529,85 @@ Component responsibilities:
 - export-buttons.html.twig standardizes export actions.
 - info-pill.html.twig standardizes compact status/info pills.
 
-7.4 Current data ownership
+7.4 Page-to-component traffic map
+
+This is the simplest way to understand how templates are connected.
+
+- Login page traffic
+  login.html.twig
+  -> base.html.twig in auth mode
+  -> page-local login markup
+  -> no sidebar component
+
+- RDV page traffic
+  rdv/index.html.twig
+  -> base.html.twig
+  -> dashboard/sidebar.html.twig
+  -> ui/panel.html.twig
+  -> ui/table-controls.html.twig
+  -> ui/pagination.html.twig
+  -> ui/info-pill.html.twig
+  -> ui/icon.html.twig
+
+- Clients page traffic
+  clients/index.html.twig
+  -> base.html.twig
+  -> dashboard/sidebar.html.twig
+  -> ui/page-header.html.twig
+  -> ui/panel.html.twig for the search panel
+  -> ui/panel.html.twig for the list panel
+  -> ui/pagination.html.twig
+  -> ui/info-pill.html.twig
+  -> ui/icon.html.twig
+
+- Consultation list page traffic
+  consultation/en-communication.html.twig
+  -> base.html.twig
+  -> dashboard/sidebar.html.twig
+  -> ui/page-header.html.twig
+  -> ui/panel.html.twig
+  -> ui/table-controls.html.twig
+  -> ui/export-buttons.html.twig
+  -> ui/info-pill.html.twig
+  -> ui/pagination.html.twig
+  -> ui/icon.html.twig
+
+- Consultation detail page traffic
+  consultation/details.html.twig
+  -> base.html.twig
+  -> dashboard/sidebar.html.twig
+  -> ui/page-header.html.twig
+  -> ui/modal.html.twig for history modal
+  -> ui/modal.html.twig for payment modal
+  -> ui/table-controls.html.twig inside the payment modal
+  -> ui/pagination.html.twig inside the payment modal
+  -> ui/icon.html.twig
+
+7.5 Component reuse map
+
+Shared layout components:
+- base.html.twig
+  Used by every page template in templates/pages/.
+- dashboard/sidebar.html.twig
+  Used by every dashboard page. Not used by the login page.
+
+Most reused UI components:
+- ui/icon.html.twig
+  Used across almost every page.
+- ui/panel.html.twig
+  Used by RDV, Clients, and Consultation list pages.
+- ui/page-header.html.twig
+  Used by Clients and both Consultation pages.
+- ui/table-controls.html.twig
+  Used by RDV, Consultation list, and the payment modal.
+- ui/pagination.html.twig
+  Used by RDV, Clients, Consultation list, and the payment modal.
+- ui/info-pill.html.twig
+  Used inside RDV rows, client rows, and consultation list rows.
+- ui/modal.html.twig
+  Currently used only in consultation/details.html.twig.
+
+7.6 Current data ownership
 
 Most displayed CRM data is currently static or mock data in Twig templates.
 This includes:
@@ -468,6 +638,8 @@ Responsibilities:
 - Initializes page interactions:
   - sidebar collapse/expand
   - sidebar submenu accessibility state
+  - shared dashboard-shell sidebar toggle wiring
+  - disabled submenu link prevention for missing routes
   - rendez-vous/echeance panel switching
   - generic modal open/close handling
   - history modal support
@@ -730,7 +902,8 @@ Important PHP note:
 
 14. ROUTE TEST RESULTS
 
-Validated through Apache/WAMP at http://pingo.local:
+Validated through Apache/WAMP at http://pingo.local and locally at
+http://127.0.0.1:8000:
 
 - http://pingo.local/login
   Result: 200 OK
@@ -746,6 +919,32 @@ Validated through Apache/WAMP at http://pingo.local:
 
 - http://pingo.local/consultation/details
   Result: 200 OK
+
+- http://127.0.0.1:8000/login
+  Result: 200 OK
+
+- http://127.0.0.1:8000/rdv
+  Result: 200 OK
+
+- http://127.0.0.1:8000/fiche-clients
+  Result: 200 OK
+
+- http://127.0.0.1:8000/consultation/en-communication
+  Result: 200 OK
+
+- http://127.0.0.1:8000/consultation/details
+  Result: 200 OK
+
+Sidebar behavior validated from rendered output and route wiring:
+- Consultation parent renders as a button toggle, not a navigation link.
+- Consultation parent no longer routes to /consultations or /rdv.
+- En attente de Rdv and the other not-yet-implemented submenu entries render
+  as disabled href="#" placeholders.
+- Détails de consultation renders as a visible sidebar link to
+  /consultation/details.
+- Consultation opens automatically for consultation routes and remains
+  clickable from /fiche-clients and /rdv.
+- Login renders without the sidebar.
 
 15. TESTING AND QUALITY SETUP
 
@@ -764,6 +963,18 @@ Validation performed during this report update:
 - Symfony route table checked with WAMP PHP 8.3.28.
 - Apache VirtualHost verified through live route checks.
 - Apache config test returned Syntax OK when run outside the sandbox.
+- Twig lint passed for templates/.
+- YAML lint passed for config/.
+- Container lint passed.
+- JavaScript syntax check passed for assets/app.js.
+- Route checks returned HTTP 200 for login, rdv, fiche-clients,
+  consultation/en-communication, and consultation/details on 127.0.0.1:8000.
+- Rendered HTML checks confirmed the shared sidebar state for:
+  /fiche-clients
+  /rdv
+  /consultation/en-communication
+  /consultation/details
+  /login
 - PHP lint passed with WAMP PHP 8.3.28 for:
   - src/AssetMapper/DevCompiledAssetMapperConfigReader.php
   - src/EventSubscriber/PreventDevAssetCompileSubscriber.php
@@ -783,7 +994,8 @@ Architecture limitations:
 - No database tables/migrations are implemented yet.
 - No repositories are implemented yet.
 - No application services are implemented yet.
-- Controllers do not pass dynamic data to Twig.
+- Controllers only pass presentation/layout state to Twig; business data is
+  still static/mock data inside the templates.
 - Twig templates contain static/mock data arrays.
 - Login is not connected to Symfony authentication yet.
 - Search, filters, pagination, export, edit, delete, add, payment, and modal
@@ -848,14 +1060,16 @@ The project is currently best described as:
 
 Symfony 6.4 CRM UI application
   -> WAMP/Apache virtual host at http://pingo.local
+  -> Also validated at http://127.0.0.1:8000
   -> DocumentRoot correctly set to public/
   -> Thin attribute-based controllers
   -> Twig-rendered page templates
-  -> Shared dashboard and UI components
+  -> Shared dashboard shell centralized in base.html.twig
+  -> Shared sidebar and UI components
   -> Asset Mapper/importmap frontend
   -> Dev/prod Asset Mapper workflow separated by service overrides, a console
      guard, and Composer helper scripts
-  -> Vanilla JavaScript UI behaviors
+  -> Vanilla JavaScript UI behaviors, including shared sidebar routing/state
   -> CSS design tokens, shared components, and page layouts
   -> Doctrine/PostgreSQL infrastructure prepared
   -> Security/Messenger/Mailer installed but not yet application-integrated

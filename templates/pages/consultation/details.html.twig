@@ -2,45 +2,7 @@
 
 {% block title %}Détails de consultation | Pin’Go CRM{% endblock %}
 
-{% set history_cards = [
-    { label: 'Rendez-vous', icon: 'calendar-days' },
-    { label: 'Consultation', icon: 'stethoscope' },
-    { label: 'Forfait', icon: 'package' },
-    { label: 'Paiement', icon: 'credit-card' }
-] %}
-
-{% set info_rows = [
-    [
-        { label: 'Client:', value: 'Lorem Opsum Dolor' },
-        { label: 'Date de naissance:', value: '01/01/2000' },
-        { label: 'Tél:', value: '00 00 00 00 00' }
-    ],
-    [
-        { label: 'E-mail:', value: 'Lorem@email.com', link: true },
-        { label: 'Voyant | consultant:', value: 'Lorem Opsum' },
-        { label: 'Source:', value: 'lorem' }
-    ],
-    [
-        { label: 'Tarif:', value: '000.00€' },
-        { label: 'Carte Principale:', value: 'xx xx xx xx xx xx xx', wide: true }
-    ]
-] %}
-
-{% set payment_rows = [
-    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false },
-    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: true },
-    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false },
-    { id: '220', numberLine1: 'xxxx xxxx xxxx', numberLine2: 'xxxx', crypto: '985', month: '9', year: '2026', status: 'accepté', active: false }
-] %}
-
-{% block body %}
-{% embed 'components/dashboard/layout.html.twig' with {
-    page_classes: 'rdv-page consultation-page',
-    main_classes: 'consultation-main',
-    content_classes: 'dashboard-content--consultation',
-    active_label: 'Consultation'
-} %}
-    {% block content %}
+{% block main_content %}
         {% include 'components/ui/page-header.html.twig' with {
             icon: 'file-text',
             icon_size: 'lg',
@@ -59,7 +21,7 @@
                 <span class="consultation-history__label">Historique des:</span>
 
                 <div class="consultation-history__cards">
-                    {% for card in history_cards %}
+                    {% for card in page.history.cards %}
                         <button class="btn consultation-history-card" type="button" data-modal-open="historique-modal" aria-haspopup="dialog" aria-controls="historique-modal">
                             {% include 'components/ui/icon.html.twig' with { name: card.icon, size: 'md' } only %}
                             <span>{{ card.label }}</span>
@@ -82,7 +44,7 @@
                     <span class="consultation-card-header__icon">
                         {% include 'components/ui/icon.html.twig' with { name: 'user', size: 'lg', variant: 'primary' } only %}
                     </span>
-                    <h2 id="consultation-card-title">CONS ID: 9</h2>
+                    <h2 id="consultation-card-title">CONS ID: {{ page.consultation.id }}</h2>
                 </div>
 
                 <div class="consultation-card-actions">
@@ -97,7 +59,7 @@
             </header>
 
             <div class="consultation-info-grid">
-                {% for row in info_rows %}
+                {% for row in page.consultation.infoRows %}
                     <div class="consultation-info-grid__row">
                         {% for item in row %}
                             <div class="consultation-info-item{% if item.wide|default(false) %} consultation-info-item--wide{% endif %}">
@@ -138,29 +100,31 @@
                         <span role="columnheader">Actions</span>
                     </div>
 
-                    <article class="consultation-rdv-table__row" role="row">
-                        <span role="cell" data-label="Date">
-                            <span class="consultation-date-stack">
-                                <span>2025-12-11</span>
-                                <span>08:46:00</span>
+                    {% for row in page.rendezVous.rows %}
+                        <article class="consultation-rdv-table__row" role="row">
+                            <span role="cell" data-label="Date">
+                                <span class="consultation-date-stack">
+                                    <span>{{ row.date[0] }}</span>
+                                    <span>{{ row.date[1] }}</span>
+                                </span>
                             </span>
-                        </span>
-                        <span role="cell" data-label="Historique">
-                            <button class="btn-icon consultation-history-icon-button" type="button" aria-label="Voir l’historique" data-modal-open="historique-modal" aria-haspopup="dialog" aria-controls="historique-modal">
-                                {% include 'components/ui/icon.html.twig' with { name: 'book-open', size: 'md' } only %}
-                            </button>
-                        </span>
-                        <span role="cell" data-label="Status">
-                            <span class="consultation-status">En cours</span>
-                        </span>
-                        <span role="cell" data-label="Actions">
-                            <span class="consultation-rdv-actions">
-                                <button class="btn-table-pill" type="button">Reporter</button>
-                                <button class="btn-table-pill" type="button">En communication</button>
-                                <button class="btn-table-pill" type="button">Annuler</button>
+                            <span role="cell" data-label="Historique">
+                                <button class="btn-icon consultation-history-icon-button" type="button" aria-label="Voir l’historique" data-modal-open="historique-modal" aria-haspopup="dialog" aria-controls="historique-modal">
+                                    {% include 'components/ui/icon.html.twig' with { name: 'book-open', size: 'md' } only %}
+                                </button>
                             </span>
-                        </span>
-                    </article>
+                            <span role="cell" data-label="Status">
+                                <span class="consultation-status">{{ row.status }}</span>
+                            </span>
+                            <span role="cell" data-label="Actions">
+                                <span class="consultation-rdv-actions">
+                                    {% for action in row.actions %}
+                                        <button class="btn-table-pill" type="button">{{ action }}</button>
+                                    {% endfor %}
+                                </span>
+                            </span>
+                        </article>
+                    {% endfor %}
                 </div>
             </section>
 
@@ -179,35 +143,36 @@
                     </button>
                 </header>
 
-                <div class="consultation-comment-section">
-                    <h3>Consultation</h3>
-                    <div class="consultation-comment-table" role="table" aria-label="Commentaires consultation">
-                        <div class="consultation-comment-table__head" role="row">
-                            <span role="columnheader">Date:</span>
-                            <span role="columnheader">Description:</span>
-                            <span role="columnheader">Action:</span>
-                        </div>
-                        <div class="consultation-comment-table__row" role="row">
-                            <span role="cell" data-label="Date:">
-                                <span class="consultation-date-stack">
-                                    <span>2025-12-11</span>
-                                    <span>08:46:00</span>
-                                </span>
-                            </span>
-                            <span role="cell" data-label="Description:">Lorem Opsum dolor oreum</span>
-                            <span role="cell" data-label="Action:">Lorem Opsum</span>
-                        </div>
+                {% for section in page.comments %}
+                    <div class="consultation-comment-section">
+                        <h3>{{ section.title }}</h3>
+                        {% if section.rows %}
+                            <div class="consultation-comment-table" role="table" aria-label="Commentaires {{ section.title|lower }}">
+                                <div class="consultation-comment-table__head" role="row">
+                                    <span role="columnheader">Date:</span>
+                                    <span role="columnheader">Description:</span>
+                                    <span role="columnheader">Action:</span>
+                                </div>
+                                {% for row in section.rows %}
+                                    <div class="consultation-comment-table__row" role="row">
+                                        <span role="cell" data-label="Date:">
+                                            <span class="consultation-date-stack">
+                                                <span>{{ row.date[0] }}</span>
+                                                <span>{{ row.date[1] }}</span>
+                                            </span>
+                                        </span>
+                                        <span role="cell" data-label="Description:">{{ row.description }}</span>
+                                        <span role="cell" data-label="Action:">{{ row.action }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="consultation-comment-empty" aria-label="Commentaires {{ section.title|lower }}"></div>
+                        {% endif %}
                     </div>
-                </div>
-
-                <div class="consultation-comment-section">
-                    <h3>Client</h3>
-                    <div class="consultation-comment-empty" aria-label="Commentaires client"></div>
-                </div>
+                {% endfor %}
             </section>
         </div>
-    {% endblock %}
-{% endembed %}
 
 {% embed 'components/ui/modal.html.twig' with {
     id: 'historique-modal',
@@ -216,7 +181,7 @@
     modal_classes: 'historique-modal',
     close_classes: 'historique-modal__close',
     close_label: 'Fermer l’historique',
-    badge_title: 'Lorem Opsum Dolor',
+    badge_title: page.history.badgeTitle,
     badge_icon: 'file-text',
     badge_classes: 'historique-modal__header',
     footer: true,
@@ -231,14 +196,17 @@
                     <span role="columnheader">Action:</span>
                 </div>
 
-                <div class="historique-modal__table-row" role="row">
-                    <span role="cell" data-label="Date:">2025-12-11 08:46:00</span>
-                    <span role="cell" data-label="Description:">
-                        <span>Lorem Opsum dolor</span>
-                        <span>oreum</span>
-                    </span>
-                    <span role="cell" data-label="Action:">Lorem Opsum</span>
-                </div>
+                {% for row in page.history.modalRows %}
+                    <div class="historique-modal__table-row" role="row">
+                        <span role="cell" data-label="Date:">{{ row.date }}</span>
+                        <span role="cell" data-label="Description:">
+                            {% for description_line in row.description %}
+                                <span>{{ description_line }}</span>
+                            {% endfor %}
+                        </span>
+                        <span role="cell" data-label="Action:">{{ row.action }}</span>
+                    </div>
+                {% endfor %}
             </div>
 
     {% endblock %}
@@ -256,7 +224,7 @@
     close_classes: 'payment-modal__close',
     close_icon_size: 'xl',
     close_label: 'Fermer le mode de paiement',
-    badge_title: 'Lorem Opsum Dolor',
+    badge_title: page.consultation.clientName,
     badge_icon: 'wallet-cards',
     badge_icon_size: 'xl',
     badge_classes: 'payment-modal__header'
@@ -268,17 +236,17 @@
                 select_wrapper_classes: 'payment-modal__select',
                 select_icon_classes: 'payment-modal__select-icon',
                 search_classes: 'payment-modal__search',
-                per_page: 3,
-                per_page_options: [3, 6, 12],
+                per_page: page.paymentTableControls.perPage,
+                per_page_options: page.paymentTableControls.perPageOptions,
                 show_select_arrows: true,
-                search_placeholder: 'Rechercher...',
-                search_aria_label: 'Rechercher un mode de paiement',
-                select_aria_label: 'Nombre d’éléments de paiement affichés'
+                search_placeholder: page.paymentTableControls.searchPlaceholder,
+                search_aria_label: page.paymentTableControls.searchAriaLabel,
+                select_aria_label: page.paymentTableControls.selectAriaLabel
             } only %}
 
             <div class="payment-modal__table crm-table crm-table-scroll" role="table" aria-label="Modes de paiement" style="--table-columns: 0.7fr 1.7fr 1fr 1fr 1fr 1.3fr 0.9fr;">
                 <div class="payment-modal__table-head crm-table__header" role="row">
-                    {% for header in ['ID', 'Numéro', 'Crypto', 'Month', 'Year', 'Status', 'Maj'] %}
+                    {% for header in page.paymentMethods.headers %}
                         <span role="columnheader" class="crm-table__cell payment-modal__column-label">
                             <span>{{ header }}</span>
                             <span class="payment-modal__sort" aria-hidden="true">
@@ -290,7 +258,7 @@
                 </div>
 
                 <div class="payment-modal__table-body crm-table__body">
-                    {% for row in payment_rows %}
+                    {% for row in page.paymentMethods.rows %}
                         <article class="payment-modal__table-row crm-table__row{% if row.active %} is-featured crm-table__row--active{% endif %}" role="row">
                             <span class="crm-table__cell" role="cell" data-label="ID">{{ row.id }}</span>
                             <span class="crm-table__cell" role="cell" data-label="Numéro">
@@ -317,7 +285,13 @@
                 extra_classes: 'payment-modal__pagination',
                 pages_classes: 'payment-modal__pages',
                 show_all_classes: 'payment-modal__show-all',
-                aria_label: 'Pagination des modes de paiement'
+                aria_label: 'Pagination des modes de paiement',
+                summary_text: page.paymentPagination.summary,
+                current_page: page.paymentPagination.currentPage,
+                total_pages: page.paymentPagination.totalPages,
+                pages: page.paymentPagination.pages,
+                show_ellipsis: page.paymentPagination.showEllipsis,
+                show_all_label: page.paymentPagination.showAllLabel
             } only %}
 
             <div class="payment-modal__actions">

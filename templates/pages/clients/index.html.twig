@@ -2,21 +2,7 @@
 
 {% block title %}Gestion des Clients | Pin’Go CRM{% endblock %}
 
-{% set clients = [
-    { id: '#0001', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
-    { id: '#0002', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
-    { id: '#0003', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' },
-    { id: '#0003', firstName: 'Jhon', lastName: 'Jhonny', birthDate: '01/01/2000', tel: '04 33 22 11 33' }
-] %}
-
-{% block body %}
-{% embed 'components/dashboard/layout.html.twig' with {
-    page_classes: 'rdv-page clients-page',
-    main_classes: 'clients-main',
-    content_classes: 'dashboard-content--clients',
-    active_label: 'Fiche clients'
-} %}
-    {% block content %}
+{% block main_content %}
         {% include 'components/ui/page-header.html.twig' with {
             icon: 'contact-round',
             title: 'Gestion des Clients',
@@ -40,22 +26,22 @@
             <form class="clients-search-form" action="#" method="get">
                 <label class="clients-field clients-field--active">
                     <span class="clients-field__label">Prénom du client</span>
-                    <input class="crm-input" type="text" name="prenom" value="Eddy" aria-label="Prénom du client">
+                    <input class="crm-input" type="text" name="prenom" value="{{ page.search.firstName }}" aria-label="Prénom du client">
                 </label>
 
                 <label class="clients-field">
                     <span class="clients-field__label">Nom du client</span>
-                    <input class="crm-input" type="text" name="nom" placeholder="Nom du client" aria-label="Nom du client">
+                    <input class="crm-input" type="text" name="nom" value="{{ page.search.lastName }}" placeholder="Nom du client" aria-label="Nom du client">
                 </label>
 
                 <label class="clients-field">
                     <span class="clients-field__label">Téléphone du client</span>
-                    <input class="crm-input" type="tel" name="telephone" placeholder="Téléphone du client" aria-label="Téléphone du client">
+                    <input class="crm-input" type="tel" name="telephone" value="{{ page.search.phone }}" placeholder="Téléphone du client" aria-label="Téléphone du client">
                 </label>
 
                 <label class="clients-field clients-field--with-icon">
                     <span class="clients-field__label">Date de naissance</span>
-                    <input class="crm-input" type="text" name="date" placeholder="jj/mm/aaaa" aria-label="Date de naissance">
+                    <input class="crm-input" type="text" name="date" value="{{ page.search.birthDate }}" placeholder="jj/mm/aaaa" aria-label="Date de naissance">
                     <span class="clients-field__icon">
                         {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
                     </span>
@@ -80,20 +66,19 @@
 
                 <div class="clients-filter-row">
                     <div class="clients-tabs" role="tablist" aria-label="Filtres clients">
-                        <button class="clients-tab is-active" type="button" role="tab" aria-selected="true">Titre</button>
-                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
-                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
-                        <button class="clients-tab" type="button" role="tab" aria-selected="false">Titre</button>
+                        {% for tab in page.filters.tabs %}
+                            <button class="clients-tab{% if tab.active %} is-active{% endif %}" type="button" role="tab" aria-selected="{{ tab.active ? 'true' : 'false' }}">{{ tab.label }}</button>
+                        {% endfor %}
                     </div>
 
                     <div class="clients-date-range" aria-label="Filtre par date">
                         <label class="clients-date-field">
-                            <input class="crm-date-input" type="text" value="10-01-2026" aria-label="Date de début">
+                            <input class="crm-date-input" type="text" value="{{ page.filters.dateFrom }}" aria-label="Date de début">
                             {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
                         </label>
                         <span>jusqu’à</span>
                         <label class="clients-date-field">
-                            <input class="crm-date-input" type="text" value="10-01-2026" aria-label="Date de fin">
+                            <input class="crm-date-input" type="text" value="{{ page.filters.dateTo }}" aria-label="Date de fin">
                             {% include 'components/ui/icon.html.twig' with { name: 'calendar-days', size: 'sm' } only %}
                         </label>
                     </div>
@@ -116,7 +101,7 @@
                 </div>
 
                 <div class="clients-table__body crm-table__body">
-                    {% for client in clients %}
+                    {% for client in page.clients %}
                         <article class="clients-table__row crm-table__row" role="row">
                             <span class="crm-table__cell" role="cell" data-label="ID">{{ client.id }}</span>
                             <span class="crm-table__cell" role="cell" data-label="Prénom">{{ client.firstName }}</span>
@@ -146,10 +131,14 @@
             </div>
 
             {% include 'components/ui/pagination.html.twig' with {
-                extra_classes: 'rdv-panel__footer clients-panel__footer'
+                extra_classes: 'rdv-panel__footer clients-panel__footer',
+                summary_text: page.pagination.summary,
+                current_page: page.pagination.currentPage,
+                total_pages: page.pagination.totalPages,
+                pages: page.pagination.pages,
+                show_ellipsis: page.pagination.showEllipsis,
+                show_all_label: page.pagination.showAllLabel
             } only %}
             {% endblock %}
         {% endembed %}
-    {% endblock %}
-{% endembed %}
 {% endblock %}

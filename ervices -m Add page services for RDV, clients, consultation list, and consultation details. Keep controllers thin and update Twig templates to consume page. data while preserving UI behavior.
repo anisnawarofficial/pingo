@@ -1,0 +1,39 @@
+warning: in the working copy of 'TECHNICAL_REPORT.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'assets/app.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'assets/styles/app.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'assets/styles/layouts/rdv.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/Controller/ClientController.php', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/Controller/ConsultationController.php', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/Controller/RdvController.php', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/Controller/SecurityController.php', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/base.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/components/dashboard/layout.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/components/dashboard/sidebar.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/components/ui/export-buttons.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/components/ui/pagination.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/components/ui/table-controls.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pages/clients/index.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pages/consultation/details.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pages/consultation/en-communication.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pages/rdv/index.html.twig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pages/security/login.html.twig', LF will be replaced by CRLF the next time Git touches it
+ TECHNICAL_REPORT.txt                               | 244 [32m+++++++++++++++++++[m[31m--[m
+ assets/app.js                                      |  66 [32m+++[m[31m---[m
+ assets/styles/app.css                              |   1 [32m+[m
+ assets/styles/layouts/rdv.css                      |  85 [32m+++[m[31m----[m
+ src/Controller/ClientController.php                |  12 [32m+[m[31m-[m
+ src/Controller/ConsultationController.php          |  26 [32m++[m[31m-[m
+ src/Controller/RdvController.php                   |  13 [32m+[m[31m-[m
+ src/Controller/SecurityController.php              |   4 [32m+[m[31m-[m
+ templates/base.html.twig                           |  35 [32m++[m[31m-[m
+ templates/components/dashboard/layout.html.twig    |   3 [32m+[m[31m-[m
+ templates/components/dashboard/sidebar.html.twig   | 169 [32m+++++++++[m[31m-----[m
+ templates/components/ui/export-buttons.html.twig   |   2 [32m+[m[31m-[m
+ templates/components/ui/pagination.html.twig       |   4 [32m+[m[31m-[m
+ templates/components/ui/table-controls.html.twig   |   4 [32m+[m[31m-[m
+ templates/pages/clients/index.html.twig            |  47 [32m++[m[31m--[m
+ templates/pages/consultation/details.html.twig     | 188 [32m+++++++[m[31m---------[m
+ .../pages/consultation/en-communication.html.twig  |  89 [32m++[m[31m------[m
+ templates/pages/rdv/index.html.twig                | 174 [32m+++[m[31m------------[m
+ templates/pages/security/login.html.twig           |   3 [32m+[m[31m-[m
+ 19 files changed, 653 insertions(+), 516 deletions(-)
